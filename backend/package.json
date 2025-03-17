@@ -9,7 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "server": "nodemon server.js"
+    "server": "npx kill-port 8001 && nodemon server.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

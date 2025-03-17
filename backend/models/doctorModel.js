@@ -11,9 +11,9 @@ const doctorSchema = new mongoose.Schema(
     degree: { type: String, required: true },
     about: { type: String, required: true },
     fee: { type: Number, required: true },
-    availability: { type: Boolean, required: true },
+    availability: { type: Boolean, default: true},
     address: { type: Object, required: true },
-    date: { type: Date, required: true },
+    date: { type: Date, required: true, default:new Date() },
     slots_booked: { type: Object, default: {} },
   },
   { minimize: false }
