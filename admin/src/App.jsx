@@ -1,9 +1,22 @@
-import React from 'react'
+import React, { useContext } from "react";
+import Login from "./pages/Login";
+import { ToastContainer } from "react-toastify";
+import { AdminContext } from "./context/AdminContext";
 
 const App = () => {
-  return (
-    <div className='text-primary'>App</div>
-  )
-}
+  const { aToken } = useContext(AdminContext);
+  // console.log("App rendering, token status:", !!aToken, "Token value:", aToken);
 
-export default App
+  return aToken ? (
+    <div>
+      <ToastContainer />
+    </div>
+  ) : (
+    <>
+      <Login />
+      <ToastContainer />
+    </>
+  );
+};
+
+export default App;
