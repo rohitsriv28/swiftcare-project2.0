@@ -12,7 +12,6 @@ const Home = () => {
       <SpecialityMenu />
       <TopDocs />
       <Banner />
-      <Footer />
     </div>
   );
 };

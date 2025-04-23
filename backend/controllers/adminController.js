@@ -44,7 +44,7 @@ const addDoctor = async (req, res) => {
     }
 
     // password validation
-    if (password.length < 6) {
+    if (password.length < 8) {
       return res.status(400).json({
         success: false,
         message: "Password must be atleast 6 characters",
