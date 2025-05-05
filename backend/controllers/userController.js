@@ -128,6 +128,7 @@ const updateProfile = async (req, res) => {
     if (userImage) {
       const imageUpload = await cloudinary.uploader.upload(userImage.path, {
         resource_type: "image",
+        folder: "users",
       });
       updatedData.image = imageUpload.secure_url;
     }
@@ -198,4 +199,55 @@ const bookAppointment = async (req, res) => {
   }
 };
 
-export { registerUser, userLogin, getProfile, updateProfile, bookAppointment };
+// API to get all appointments of user
+const listAppointments = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const appointments = await appointmentModel.find({ userId });
+
+    res.json({ success: true, appointments });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+//API to cancel appointment
+const cancelAppointment = async (req, res) => {
+  try {
+    const { userId, appointmentId } = req.body;
+    const appointmentData = await appointmentModel.findById(appointmentId);
+    //Validating user
+    if (appointmentData.userId !== userId) {
+      return res.json({
+        success: false,
+        message: "You are not authorized to cancel this appointment",
+      });
+    }
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      isCancelled: true,
+    });
+
+    // Removing slots from DocData
+    const { docId, slotDate, slotTime } = appointmentData;
+    const docData = await doctorModel.findById(docId);
+    let slots_booked = docData.slots_booked;
+    slots_booked[slotDate] = slots_booked[slotDate].filter(
+      (e) => e !== slotTime
+    );
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+    res.json({ success: true, message: "Appointment cancelled successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+export {
+  registerUser,
+  userLogin,
+  getProfile,
+  updateProfile,
+  bookAppointment,
+  listAppointments,
+  cancelAppointment,
+};
