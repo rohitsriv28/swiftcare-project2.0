@@ -10,6 +10,7 @@ import {
 } from "../controllers/userController.js";
 import authUser from "../middleware/authUser.js";
 import upload from "../middleware/multer.js";
+import { payWithRazorpay, verifyRazorpayPayment } from "../controllers/paymentController.js";
 
 const userRouter = express.Router();
 
@@ -25,5 +26,7 @@ userRouter.post(
 userRouter.post("/book-appointment", authUser, bookAppointment);
 userRouter.get("/appointments", authUser, listAppointments);
 userRouter.post("/cancel-appointment", authUser, cancelAppointment);
+userRouter.post("/pay-with-razorpay", authUser, payWithRazorpay);
+userRouter.post("/verify-payment", authUser, verifyRazorpayPayment);
 
 export default userRouter;

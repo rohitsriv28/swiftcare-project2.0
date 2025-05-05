@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -7,7 +8,7 @@ const MyAppointments = () => {
   const { backendUrl, token, getDoctorsData } = useContext(AppContext);
 
   const [appointments, setAppointments] = useState([]);
-
+  const navigate = useNavigate();
   const months = [
     "",
     "Jan",
@@ -55,9 +56,57 @@ const MyAppointments = () => {
       if (data.success) {
         toast.success(data.message);
         getUserAppointments();
-        getDoctorsData()
+        getDoctorsData();
       } else {
         toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
+  const initPayment = (order) => {
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: order.currency,
+      name: "Doctor's Appointment Payment",
+      description: "Appointment Payment  at SwiftCare",
+      order_id: order.id,
+      receipt: order.receipt,
+      handler: async (response) => {
+        console.log(response);
+        try {
+          const { data } = await axios.post(
+            backendUrl + "/api/user/verify-payment",
+            response,
+            { headers: { token } }
+          );
+          if (data.success) {
+            getUserAppointments();
+            navigate("/my-appointments");
+          }
+        } catch (error) {
+          console.log(error);
+          toast.error(error.message);
+        }
+      },
+    };
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+  };
+
+  const handlePayment = async (appointmentId) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/user/pay-with-razorpay",
+        { appointmentId },
+        { headers: { token } }
+      );
+      if (data.success) {
+        console.log(data.order);
+        initPayment(data.order);
       }
     } catch (error) {
       console.log(error);
@@ -101,12 +150,20 @@ const MyAppointments = () => {
             </div>
             <div></div>
             <div className="flex flex-col gap-2 justify-end">
-              {!item.isCancelled && (
-                <button className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300">
+              {!item.isCancelled && item.payment && (
+                <p className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded bg-green-300">
+                  Paid
+                </p>
+              )}
+              {!item.isCancelled && !item.payment && (
+                <button
+                  onClick={() => handlePayment(item._id)}
+                  className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300"
+                >
                   Pay Online
                 </button>
               )}
-              {!item.isCancelled && (
+              {!item.isCancelled && !item.payment &&  (
                 <button
                   onClick={() => cancelAppointment(item._id)}
                   className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300"
