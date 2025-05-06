@@ -3,6 +3,8 @@ import bcrypt from "bcrypt";
 import { v2 as cloudinary } from "cloudinary";
 import doctorModel from "../models/doctorModel.js";
 import jwt from "jsonwebtoken";
+import appointmentModel from "../models/appointmentModel.js";
+import userModel from "../models/userModel.js";
 
 //API for adding doctor
 const addDoctor = async (req, res) => {
@@ -103,7 +105,7 @@ const adminLogin = async (req, res) => {
       const token = jwt.sign(
         { email }, // Store email as payload
         process.env.JWT_SECRET,
-        { expiresIn: "1h" } // Now expiresIn will work
+        { expiresIn: "12h" }
       );
 
       return res.status(200).json({
@@ -137,4 +139,211 @@ const allDoctors = async (req, res) => {
   }
 };
 
-export { addDoctor, adminLogin, allDoctors };
+//API for fetching all appointments with pagination
+const allAppointments = async (req, res) => {
+  try {
+    // Get pagination parameters from query string
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Count total appointments for pagination info
+    const total = await appointmentModel.countDocuments();
+
+    // Fetch appointments with pagination
+    const appointments = await appointmentModel
+      .find({})
+      .sort({ date: -1 }) // Sort by date descending (newest first)
+      .skip(skip)
+      .limit(limit);
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    res.json({
+      success: true,
+      appointments,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// API for appointment cancellation
+const appointmentCancellationByAdmin = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+    const appointmentData = await appointmentModel.findById(appointmentId);
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      isCancelled: true,
+    });
+
+    // Removing slots from DocData
+    const { docId, slotDate, slotTime } = appointmentData;
+    const docData = await doctorModel.findById(docId);
+    let slots_booked = docData.slots_booked;
+    slots_booked[slotDate] = slots_booked[slotDate].filter(
+      (e) => e !== slotTime
+    );
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+    res.json({ success: true, message: "Appointment cancelled successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+//API for Admin Dashboard Data
+const adminDashboarddata = async (req, res) => {
+  try {
+    const doctors = await doctorModel.find({});
+    const appointments = await appointmentModel.find({});
+    const users = await userModel.find({});
+
+    // Calculate active doctors
+    const activeDoctors = doctors.filter((doc) => doc.availability).length;
+
+    // Calculate today's date string in the same format as slotDate
+    const today = new Date();
+    const todayDateString = `${today.getDate()}_${
+      today.getMonth() + 1
+    }_${today.getFullYear()}`;
+
+    // Filter today's appointments
+    const todayAppointments = appointments.filter(
+      (app) => app.slotDate === todayDateString && !app.isCancelled
+    );
+
+    // Calculate total revenue from completed and PAID appointments only
+    const totalRevenue = appointments.reduce(
+      (sum, app) => sum + (app.isCancelled || !app.payment ? 0 : app.amount),
+      0
+    );
+
+    // Get last 10 appointments sorted by date
+    const latestAppointments = appointments
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 10);
+
+    // Get top 5 doctors by number of appointments
+    const doctorAppointments = {};
+    appointments.forEach((app) => {
+      if (!app.isCancelled && app.payment) {
+        // Only count paid appointments
+        const docId = app.docId.toString();
+        doctorAppointments[docId] = (doctorAppointments[docId] || 0) + 1;
+      }
+    });
+
+    const topDoctors = Object.entries(doctorAppointments)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([docId, count]) => {
+        const doctor = doctors.find((d) => d._id.toString() === docId);
+        return {
+          id: docId,
+          name: doctor?.name || "Unknown",
+          image: doctor?.image || "",
+          speciality: doctor?.speciality || "",
+          appointments: count,
+          revenue: appointments
+            .filter(
+              (a) => a.docId.toString() === docId && !a.isCancelled && a.payment
+            ) // Only count paid appointments
+            .reduce((sum, a) => sum + a.amount, 0),
+        };
+      });
+
+    // Get appointments by specialty
+    const specialtyStats = {};
+    appointments.forEach((app) => {
+      if (!app.isCancelled && app.payment) {
+        // Only count paid appointments
+        const specialty = app.docData?.speciality || "Unknown";
+        specialtyStats[specialty] = specialtyStats[specialty] || {
+          count: 0,
+          revenue: 0,
+        };
+        specialtyStats[specialty].count++;
+        specialtyStats[specialty].revenue += app.amount;
+      }
+    });
+
+    const dashboardData = {
+      stats: {
+        totalDoctors: doctors.length,
+        activeDoctors,
+        totalAppointments: appointments.length,
+        pendingAppointments: appointments.filter((a) => !a.isCancelled).length,
+        paidAppointments: appointments.filter(
+          (a) => !a.isCancelled && a.payment
+        ).length,
+        totalPatients: users.length,
+        todayAppointments: todayAppointments.length,
+        totalRevenue,
+      },
+      latestAppointments,
+      topDoctors,
+      specialtyStats: Object.entries(specialtyStats).map(([name, stats]) => ({
+        name,
+        ...stats,
+      })),
+      appointmentsByDay: getLast30DaysAppointments(appointments),
+    };
+
+    res.json({ success: true, dashboardData });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Helper function to get appointments by day for last 30 days
+function getLast30DaysAppointments(appointments) {
+  const today = new Date();
+  const result = [];
+
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const dateString = `${day}_${month}_${year}`;
+    const displayDate = `${day}/${month}`;
+
+    const dayAppointments = appointments.filter(
+      (app) => app.slotDate === dateString && !app.isCancelled && app.payment // Only count paid appointments
+    );
+
+    result.push({
+      date: dateString,
+      displayDate,
+      appointments: dayAppointments.length,
+      revenue: dayAppointments.reduce((sum, app) => sum + app.amount, 0),
+    });
+  }
+
+  return result;
+}
+
+export {
+  addDoctor,
+  adminLogin,
+  allDoctors,
+  allAppointments,
+  appointmentCancellationByAdmin,
+  adminDashboarddata,
+};
