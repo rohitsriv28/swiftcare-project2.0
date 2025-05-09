@@ -150,12 +150,20 @@ const MyAppointments = () => {
             </div>
             <div></div>
             <div className="flex flex-col gap-2 justify-end">
-              {!item.isCancelled && item.payment && (
+              {!item.isCancelled && item.isComplete && (
+                <div className="text-sm text-center sm:min-w-48 py-2 border rounded bg-blue-300 text-blue-800">
+                  Completed
+                  <span className="block mt-1 text-xs">
+                    {item.payment ? "Online Payment" : "Cash Payment"}
+                  </span>
+                </div>
+              )}
+              {!item.isCancelled && !item.isComplete && item.payment && (
                 <p className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded bg-green-300">
-                  Paid
+                  Paid Online
                 </p>
               )}
-              {!item.isCancelled && !item.payment && (
+              {!item.isCancelled && !item.payment && !item.isComplete && (
                 <button
                   onClick={() => handlePayment(item._id)}
                   className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300"
@@ -163,7 +171,7 @@ const MyAppointments = () => {
                   Pay Online
                 </button>
               )}
-              {!item.isCancelled && !item.payment &&  (
+              {!item.isCancelled && !item.payment && !item.isComplete && (
                 <button
                   onClick={() => cancelAppointment(item._id)}
                   className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300"

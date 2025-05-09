@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { DoctorContext } from "../../context/DoctorContext";
 import { AppContext } from "../../context/AppContext";
-import { User, Calendar, CheckSquare, X, BadgeIndianRupee, RefreshCw } from "lucide-react";
+import { User, Calendar, CheckSquare, X, BadgeIndianRupee, RefreshCw, Clock, DollarSign } from "lucide-react";
 
 const DoctorDashboard = () => {
   const {
@@ -50,6 +50,12 @@ const DoctorDashboard = () => {
       color: "bg-green-50 text-green-600",
     },
     {
+      title: "Pending",
+      value: dashboardData?.pendingAppointments || 0,
+      icon: <Clock size={24} />,
+      color: "bg-yellow-50 text-yellow-600",
+    },
+    {
       title: "Cancelled",
       value: dashboardData?.cancelledAppointments || 0,
       icon: <X size={24} />,
@@ -57,13 +63,22 @@ const DoctorDashboard = () => {
     },
     {
       title: "Total Earnings",
-      value: `${currencySymbol}${dashboardData?.earnings || 0}`,
+      value: `${currencySymbol}${dashboardData?.totalEarnings || 0}`,
       icon: <BadgeIndianRupee size={24} />,
       color: "bg-purple-50 text-purple-600",
+      description: "Online paid + Completed cash appointments",
+    },
+    {
+      title: "Pending Payments",
+      value: `${currencySymbol}${dashboardData?.pendingPayments || 0}`,
+      icon: <DollarSign size={24} />,
+      color: "bg-orange-50 text-orange-600",
+      description: "Upcoming appointments only",
     },
   ];
 
-  const upcomingAppointments = dashboardData?.latestAppointments || [];
+  const upcomingAppointments = dashboardData?.upcomingAppointments || [];
+  const recentAppointments = dashboardData?.recentAppointments || [];
 
   if (loading) {
     return (
@@ -117,7 +132,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-6 mb-6 lg:mb-8">
         {stats.map((stat, index) => (
           <div
             key={index}
@@ -129,6 +144,9 @@ const DoctorDashboard = () => {
                 <p className="text-xl lg:text-2xl font-bold mt-2">
                   {stat.value}
                 </p>
+                {stat.description && (
+                  <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
+                )}
               </div>
               <div className={`p-3 ${stat.color} rounded-full`}>
                 {stat.icon}
@@ -139,7 +157,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Upcoming Appointments */}
-      <div className="bg-white rounded-lg shadow p-4 lg:p-6">
+      <div className="bg-white rounded-lg shadow p-4 lg:p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Upcoming Appointments</h2>
           <span className="text-xs text-gray-500">
@@ -154,7 +172,6 @@ const DoctorDashboard = () => {
                 key={appointment._id}
                 className="flex items-center p-3 border rounded-lg hover:bg-gray-50 transition"
               >
-                {/* Patient Image or Default Icon */}
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 overflow-hidden">
                   {appointment.userData?.image ? (
                     <img
@@ -167,7 +184,6 @@ const DoctorDashboard = () => {
                   )}
                 </div>
 
-                {/* Appointment Details */}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{appointment.userData?.name}</p>
                   <p className="text-xs text-gray-500">
@@ -175,16 +191,18 @@ const DoctorDashboard = () => {
                   </p>
                 </div>
 
-                {/* Payment Status */}
-                <div>
+                <div className="flex flex-col items-end">
                   <span
                     className={`px-2 py-1 text-xs font-medium rounded-full ${
                       appointment.payment
                         ? "bg-green-100 text-green-800"
-                        : " bg-yellow-100 text-yellow-800"
+                        : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
                     {appointment.payment ? "Paid" : "Pending"}
+                  </span>
+                  <span className="text-xs font-medium mt-1">
+                    {currencySymbol}{appointment.amount}
                   </span>
                 </div>
               </div>
@@ -200,10 +218,9 @@ const DoctorDashboard = () => {
       {/* Recent Appointments */}
       <div className="bg-white rounded-lg shadow p-4 lg:p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold">Recent Appointments</h2>
+          <h2 className="text-lg font-semibold">Recent Completed Appointments</h2>
           <span className="text-xs text-gray-500">
-            Showing {Math.min(5, docAppointments?.length || 0)} of{" "}
-            {docAppointments?.length || 0}
+            Showing {recentAppointments.length} of {dashboardData?.completedAppointments || 0}
           </span>
         </div>
 
@@ -223,19 +240,24 @@ const DoctorDashboard = () => {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {docAppointments &&
-                docAppointments.slice(0, 5).map((appointment) => (
+              {recentAppointments.length > 0 ? (
+                recentAppointments.map((appointment) => (
                   <tr key={appointment._id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                          <User size={16} className="text-blue-600" />
+                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
+                          {appointment.userData?.image ? (
+                            <img
+                              src={appointment.userData.image}
+                              alt="Patient"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <User size={16} className="text-blue-600" />
+                          )}
                         </div>
                         <div className="ml-3">
                           <div className="text-sm font-medium text-gray-900">
@@ -263,27 +285,19 @@ const DoctorDashboard = () => {
                         {appointment.payment ? "Online" : "Cash"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                       {currencySymbol}
                       {appointment.amount}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {appointment.isCancelled ? (
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                          Cancelled
-                        </span>
-                      ) : appointment.isComplete ? (
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                          Completed
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-                          Pending
-                        </span>
-                      )}
-                    </td>
                   </tr>
-                ))}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="px-4 py-8 text-center text-gray-500">
+                    No recent completed appointments
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

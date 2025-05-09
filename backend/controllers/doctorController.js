@@ -162,18 +162,30 @@ const doctorDashboardData = async (req, res) => {
     const { docId } = req.body;
     const appointments = await appointmentModel.find({ docId });
 
-    let earnings = 0;
+    let totalEarnings = 0; // Paid online appointments + completed cash appointments
+    let completedEarnings = 0; // Paid online appointments + completed cash appointments
+    let pendingPayments = 0; // Only uncompleted appointment amounts
     let completedAppointments = 0;
     let cancelledAppointments = 0;
+    let pendingAppointments = 0;
 
     appointments.forEach((item) => {
-      if (item.isComplete) {
+      if (item.isComplete && !item.isCancelled) {
         completedAppointments++;
-        // regardless of payment method (online or cash)
-        earnings += item.amount;
-      }
-      if (item.isCancelled) {
+        if (item.payment) {
+          // For online payments that are marked as paid
+          completedEarnings += item.amount;
+          totalEarnings += item.amount; // Only add to total if payment is true
+        } else {
+          // For completed cash appointments, consider them as paid
+          completedEarnings += item.amount;
+          totalEarnings += item.amount; // Add to total earnings since it's completed (cash payment assumed received)
+        }
+      } else if (item.isCancelled) {
         cancelledAppointments++;
+      } else {
+        pendingAppointments++;
+        pendingPayments += item.amount; // Only uncompleted appointments are in pending payments
       }
     });
 
@@ -185,14 +197,21 @@ const doctorDashboardData = async (req, res) => {
     });
 
     const dashboardData = {
-      earnings,
+      totalEarnings, // This now reflects only paid appointments
+      completedEarnings,
+      pendingPayments,
       appointments: appointments.length,
       completedAppointments,
       cancelledAppointments,
+      pendingAppointments,
       patients: patients.length,
-      latestAppointments: appointments
+      upcomingAppointments: appointments
         .filter((app) => !app.isComplete && !app.isCancelled)
         .sort((a, b) => new Date(a.slotDate) - new Date(b.slotDate))
+        .slice(0, 5),
+      recentAppointments: appointments
+        .filter((app) => app.isComplete && !app.isCancelled)
+        .sort((a, b) => new Date(b.slotDate) - new Date(a.slotDate))
         .slice(0, 5),
     };
 
@@ -234,7 +253,7 @@ const updateDoctorProfile = async (req, res) => {
 
     const parsedAddress =
       typeof address === "string" ? JSON.parse(address) : address;
-      
+
     let imageUrl = null;
 
     if (req.file) {
