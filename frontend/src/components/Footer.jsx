@@ -1,46 +1,214 @@
 import React from "react";
-import { assets } from "../assets/assets";
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Phone,
+  Mail,
+  ArrowRight,
+  Home,
+  Info,
+  FileText,
+  Heart,
+} from "lucide-react";
 
 const Footer = () => {
   return (
-    <div className="md:mx-10">
-      <div className="flex flex-col sm:grid grid-cols-[3fr_1fr_1fr] gap-14 my-10 mt-40 text-sm">
-        {/* -----Left Section----- */}
-        <div>
-          <img src={assets.logo} alt="" className="mb-5 w-40" />
-          <p className="w-full md:w-2/3 text-gray-600 leading-6">
-            Find, select, and book your doctor’s appointment with ease. Book
-            appointments with trusted doctors in just a few clicks. A smarter
-            way to connect with doctors and schedule your visit. Effortless
-            doctor bookings, tailored for your health needs.
-          </p>
+    <footer className="bg-gray-50 pt-16 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main Footer Content */}
+        <div className="flex flex-col sm:grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-14">
+          {/* Company Info */}
+          <div className="md:col-span-5">
+            <div className="flex items-center gap-2 mb-5">
+              <Heart size={24} className="text-primary" />
+              <span className="text-2xl font-bold text-gray-800">
+                SwiftCare
+              </span>
+            </div>
+
+            <p className="text-gray-600 leading-relaxed mb-6">
+              Find, select, and book your doctor's appointment with ease. Book
+              appointments with trusted doctors in just a few clicks. A smarter
+              way to connect with doctors and schedule your visit. Effortless
+              doctor bookings, tailored for your health needs.
+            </p>
+
+            <div className="flex items-center gap-4 mt-4">
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm hover:bg-primary hover:text-white transition-all"
+              >
+                <Facebook size={18} />
+              </a>
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm hover:bg-primary hover:text-white transition-all"
+              >
+                <Twitter size={18} />
+              </a>
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm hover:bg-primary hover:text-white transition-all"
+              >
+                <Instagram size={18} />
+              </a>
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm hover:bg-primary hover:text-white transition-all"
+              >
+                <Linkedin size={18} />
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="md:col-span-3 lg:pl-8">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5 relative inline-block">
+              COMPANY
+              <span className="absolute -bottom-1 left-0 w-1/2 h-0.5 bg-primary"></span>
+            </h3>
+
+            <ul className="flex flex-col gap-3 text-gray-600">
+              <li className="group">
+                <a
+                  href="/"
+                  className="flex items-center gap-2 hover:text-primary transition-colors"
+                >
+                  <Home size={16} className="group-hover:text-primary" />
+                  <span>Home</span>
+                </a>
+              </li>
+              <li className="group">
+                <a
+                  href="/about"
+                  className="flex items-center gap-2 hover:text-primary transition-colors"
+                >
+                  <Info size={16} className="group-hover:text-primary" />
+                  <span>About us</span>
+                </a>
+              </li>
+              <li className="group">
+                <a
+                  href="/contact"
+                  className="flex items-center gap-2 hover:text-primary transition-colors"
+                >
+                  <Phone size={16} className="group-hover:text-primary" />
+                  <span>Contact us</span>
+                </a>
+              </li>
+              <li className="group">
+                <a
+                  href="/privacy"
+                  className="flex items-center gap-2 hover:text-primary transition-colors"
+                >
+                  <FileText size={16} className="group-hover:text-primary" />
+                  <span>Privacy Policy</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div className="md:col-span-2">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5 relative inline-block">
+              SERVICES
+              <span className="absolute -bottom-1 left-0 w-1/2 h-0.5 bg-primary"></span>
+            </h3>
+
+            <ul className="flex flex-col gap-3 text-gray-600">
+              <li>
+                <a href="#" className="hover:text-primary transition-colors">
+                  Online Consultation
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary transition-colors">
+                  Appointments
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary transition-colors">
+                  Medical Reports
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary transition-colors">
+                  Health Tips
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div className="md:col-span-2">
+            <h3 className="text-lg font-semibold text-gray-800 mb-5 relative inline-block">
+              GET IN TOUCH
+              <span className="absolute -bottom-1 left-0 w-1/2 h-0.5 bg-primary"></span>
+            </h3>
+
+            <ul className="flex flex-col gap-3 text-gray-600">
+              <li>
+                <a
+                  href="tel:+977051123456"
+                  className="flex items-center gap-2 hover:text-primary transition-colors"
+                >
+                  <Phone size={16} className="text-primary" />
+                  <span>+977 051-123456</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:info@swiftcare.com"
+                  className="flex items-center gap-2 hover:text-primary transition-colors"
+                >
+                  <Mail size={16} className="text-primary" />
+                  <span>info@swiftcare.com</span>
+                </a>
+              </li>
+            </ul>
+
+            {/* Newsletter */}
+            <div className="mt-6">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">
+                Subscribe to our newsletter
+              </h4>
+              <div className="flex">
+                <input
+                  type="email"
+                  placeholder="Your Email"
+                  className="px-4 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary w-full"
+                />
+                <button className="bg-primary text-white rounded-r-lg px-3 flex items-center justify-center hover:bg-primary/90 transition-colors">
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        {/* -----Center Section----- */}
-        <div>
-          <p className="text-xl font-medium mb-5">COMPANY</p>
-          <ul className="felx flex-col gap-2 text-gray-600">
-            <li>Home</li>
-            <li>About us</li>
-            <li> Contact us</li>
-            <li>Privacy Policy</li>
-          </ul>
-        </div>
-        {/* -----Right Section----- */}
-        <div>
-          <p className="text-xl font-medium mb-5">GET IN TOUCH</p>
-          <ul className="felx flex-col gap-2 text-gray-600">
-            <li>+977 051-123456</li>
-            <li>info@swiftcare.com</li>
-          </ul>
+
+        {/* Bottom Bar */}
+        <div className="mt-16 pt-6 border-t border-gray-200">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-gray-600">
+              Copyright 2025 © SwiftCare - All Rights Reserved.
+            </p>
+            <div className="flex items-center gap-6 text-sm text-gray-600">
+              <a href="#" className="hover:text-primary transition-colors">
+                Terms
+              </a>
+              <a href="#" className="hover:text-primary transition-colors">
+                Privacy
+              </a>
+              <a href="#" className="hover:text-primary transition-colors">
+                Cookies
+              </a>
+            </div>
+          </div>
         </div>
       </div>
-      <div>
-        <hr />
-        <p className="py-5 text-sm text-center">
-          Copyright 2025@ SwiftCare - All Rights Reserved.{" "}
-        </p>
-      </div>
-    </div>
+    </footer>
   );
 };
 

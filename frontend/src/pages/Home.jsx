@@ -3,15 +3,22 @@ import Header from "../components/Header";
 import SpecialityMenu from "../components/SpecialityMenu";
 import TopDocs from "../components/TopDocs";
 import Banner from "../components/Banner";
-import Footer from "../components/Footer";
 
 const Home = () => {
   return (
-    <div>
-      <Header />
-      <SpecialityMenu />
-      <TopDocs />
-      <Banner />
+    <div className="w-full">
+      <div className="relative z-10">
+        <Header />
+      </div>
+      <div className="mt-10 md:mt-16">
+        <SpecialityMenu />
+      </div>
+      <div className="mt-12 md:mt-20">
+        <TopDocs />
+      </div>
+      <div className="mt-12 md:mt-20 mb-16">
+        <Banner />
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Doctors from "./pages/Doctors";
@@ -14,21 +14,30 @@ import Footer from "./components/Footer";
 
 const App = () => {
   return (
-    <div className="mx-4 sm:mx-[10%]">
-      <ToastContainer />
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/doctors" element={<Doctors />} />
-        <Route path="/doctors/:speciality" element={<Doctors />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/my-profile" element={<MyProfile />} />
-        <Route path="/my-appointments" element={<MyAppointments />} />
-        <Route path="/appointment/:docId" element={<Appointment />} />
-      </Routes>
-      <Footer />
+    <div className="flex flex-col min-h-screen">
+      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+      <div className="px-4 sm:px-[10%]">
+        <Navbar />
+      </div>
+
+      {/* Main content with flex-grow to push footer down */}
+      <main className="flex-grow px-4 sm:px-[10%]">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/doctors" element={<Doctors />} />
+          <Route path="/doctors/:speciality" element={<Doctors />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/my-profile" element={<MyProfile />} />
+          <Route path="/my-appointments" element={<MyAppointments />} />
+          <Route path="/appointment/:docId" element={<Appointment />} />
+        </Routes>
+      </main>
+
+      <div className="px-4 sm:px-[10%] mt-auto">
+        <Footer />
+      </div>
     </div>
   );
 };
