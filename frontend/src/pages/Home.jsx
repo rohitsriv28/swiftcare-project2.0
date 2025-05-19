@@ -1,6 +1,5 @@
 import React from "react";
 import Header from "../components/Header";
-import SpecialityMenu from "../components/SpecialityMenu";
 import TopDocs from "../components/TopDocs";
 import Banner from "../components/Banner";
 
@@ -10,9 +9,9 @@ const Home = () => {
       <div className="relative z-10">
         <Header />
       </div>
-      <div className="mt-10 md:mt-16">
+      {/* <div className="mt-10 md:mt-16">
         <SpecialityMenu />
-      </div>
+      </div> */}
       <div className="mt-12 md:mt-20">
         <TopDocs />
       </div>

@@ -10,7 +10,11 @@ import {
 } from "../controllers/userController.js";
 import authUser from "../middleware/authUser.js";
 import upload from "../middleware/multer.js";
-import { payWithRazorpay, verifyRazorpayPayment } from "../controllers/paymentController.js";
+import {
+  payWithRazorpay,
+  verifyRazorpayPayment,
+} from "../controllers/paymentController.js";
+import { searchDoctors } from "../controllers/doctorController.js";
 
 const userRouter = express.Router();
 
@@ -23,6 +27,7 @@ userRouter.post(
   authUser,
   updateProfile
 );
+userRouter.post("/search-doctors", authUser, searchDoctors);
 userRouter.post("/book-appointment", authUser, bookAppointment);
 userRouter.get("/appointments", authUser, listAppointments);
 userRouter.post("/cancel-appointment", authUser, cancelAppointment);

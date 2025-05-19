@@ -1,6 +1,7 @@
 import React from "react";
 import { assets } from "../assets/assets";
 import { Calendar, ChevronRight, Users, User } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
@@ -44,8 +45,8 @@ const Header = () => {
             </p>
           </div>
 
-          <a
-            href="#speciality"
+          <Link
+            to={'/doctors'}
             className="group flex items-center gap-2 bg-white px-8 py-3 rounded-full text-primary font-medium shadow-xl shadow-primary/20 hover:shadow-primary/30 hover:scale-105 transition-all duration-300"
           >
             <Calendar size={18} />
@@ -54,7 +55,7 @@ const Header = () => {
               size={16}
               className="group-hover:translate-x-1 transition-transform"
             />
-          </a>
+          </Link>
 
           <div className="flex items-center gap-4 mt-4 text-white/90">
             <div className="flex flex-col items-center">

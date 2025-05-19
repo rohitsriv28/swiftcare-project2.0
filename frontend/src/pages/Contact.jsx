@@ -50,7 +50,7 @@ const Contact = () => {
                     className="text-primary mt-1 flex-shrink-0"
                   />
                   <p className="text-gray-600">
-                    54709 Willms Station <br /> Suite 350, Washington, USA
+                    Birta Police Chowki, Birta - 4 <br /> Birgunj, Parsa, Nepal
                   </p>
                 </div>
 

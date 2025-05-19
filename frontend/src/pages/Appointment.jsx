@@ -4,7 +4,15 @@ import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 import RelatedDoctors from "../components/RelatedDoctors";
-import { Calendar, Clock, Info, Check, ChevronRight, Medal } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Info,
+  Check,
+  ChevronRight,
+  Medal,
+  ChevronLeft,
+} from "lucide-react";
 
 const Appointment = () => {
   const { docId } = useParams();
@@ -17,6 +25,9 @@ const Appointment = () => {
   const [slotIndex, setSlotIndex] = useState(0);
   const [slotTime, setSlotTime] = useState("");
   const [loading, setLoading] = useState(true);
+  const [mobileViewIndex, setMobileViewIndex] = useState(0); // For tracking which group of 3 dates is shown on mobile
+  const datesPerMobileView = 3;
+  const totalMobileViews = Math.ceil(docSlots.length / datesPerMobileView);
   const navigate = useNavigate();
 
   const fetchDocInfo = async () => {
@@ -140,6 +151,60 @@ const Appointment = () => {
     }
   }, [docInfo]);
 
+  // Calculate total pages for time slots pagination
+  const totalPages =
+    docSlots.length > 0 && docSlots[slotIndex]
+      ? Math.ceil(docSlots[slotIndex].length / 9)
+      : 0;
+
+  // Get current page slots
+  const getCurrentPageSlots = () => {
+    if (!docSlots.length || !docSlots[slotIndex]) return [];
+    const startIndex = currentSlotPage * 9;
+    const endIndex = startIndex + 9;
+    return docSlots[slotIndex].slice(startIndex, endIndex);
+  };
+
+  // For mobile date navigation
+  const getVisibleDatesForMobile = () => {
+    const startIndex = mobileViewIndex * datesPerMobileView;
+    const endIndex = Math.min(startIndex + datesPerMobileView, docSlots.length);
+    return docSlots.slice(startIndex, endIndex);
+  };
+
+  // Handle pagination for slots
+  const goToNextPage = () => {
+    if (currentSlotPage < totalPages - 1) {
+      setCurrentSlotPage(currentSlotPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentSlotPage > 0) {
+      setCurrentSlotPage(currentSlotPage - 1);
+    }
+  };
+
+  // Handle navigation for mobile date view
+  const goToNextDateGroup = () => {
+    if (mobileViewIndex < totalMobileViews - 1) {
+      setMobileViewIndex(mobileViewIndex + 1);
+    }
+  };
+
+  const goToPreviousDateGroup = () => {
+    if (mobileViewIndex > 0) {
+      setMobileViewIndex(mobileViewIndex - 1);
+    }
+  };
+
+  // Reset pagination when date changes
+  useEffect(() => {
+    setCurrentSlotPage(0);
+  }, [slotIndex]);
+
+  const [currentSlotPage, setCurrentSlotPage] = useState(0);
+
   // Show login message if not logged in
   if (!token) {
     return (
@@ -190,8 +255,9 @@ const Appointment = () => {
               </div>
             </div>
           </div>
-          
-          <div className="flex-1 border border-gray-200 rounded-2xl p-6 bg-white shadow-md relative mt-[-30px] sm:mt-0 z-10">
+
+          <div className="flex-1 border border-gray-200 rounded-2xl p-6 bg-white shadow-md relative sm:mt-0 z-10">
+            {/* Removed negative margin that was causing the overlap on mobile */}
             <div className="flex justify-between flex-wrap gap-2">
               <div>
                 <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
@@ -208,13 +274,15 @@ const Appointment = () => {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-gray-500 text-sm font-medium">Appointment Fee</p>
+                <p className="text-gray-500 text-sm font-medium">
+                  Appointment Fee
+                </p>
                 <p className="text-xl font-bold text-primary">
                   {currencySymbol} {docInfo.fee}
                 </p>
               </div>
             </div>
-            
+
             <div className="mt-6">
               <h3 className="flex items-center gap-1 text-md font-semibold text-gray-900 mb-2">
                 <Info size={16} className="text-primary" /> About Doctor
@@ -223,7 +291,7 @@ const Appointment = () => {
                 {docInfo.about}
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 text-sm">
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-gray-500 mb-1">Specialization</p>
@@ -244,16 +312,80 @@ const Appointment = () => {
         {/* -----Booking Slots----- */}
         <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
           <h3 className="flex items-center gap-2 text-xl font-semibold text-gray-800 mb-6">
-            <Calendar size={20} className="text-primary" /> Available Booking Slots
+            <Calendar size={20} className="text-primary" /> Available Booking
+            Slots
           </h3>
-          
-          <div className="flex gap-3 items-center w-full overflow-x-auto pb-2 mb-6 hide-scrollbar">
+
+          {/* Date selection - Mobile view (3 dates with arrows) */}
+          <div className="md:hidden flex items-center justify-between gap-2 mb-6">
+            {/* Left arrow */}
+            <button
+              onClick={goToPreviousDateGroup}
+              disabled={mobileViewIndex === 0}
+              className={`p-2 rounded-full ${
+                mobileViewIndex === 0
+                  ? "text-gray-300"
+                  : "text-primary hover:bg-blue-50"
+              }`}
+            >
+              <ChevronLeft size={24} />
+            </button>
+
+            {/* Display 3 dates for mobile */}
+            <div className="flex-1 flex justify-center gap-2">
+              {getVisibleDatesForMobile().map((dateSlots, index) => {
+                if (!dateSlots[0]) return null;
+
+                const dateItem = dateSlots[0];
+                const actualIndex =
+                  mobileViewIndex * datesPerMobileView + index;
+
+                return (
+                  <div
+                    key={index}
+                    onClick={() => setSlotIndex(actualIndex)}
+                    className={`flex-1 text-center py-3 px-1 rounded-xl cursor-pointer transition-all duration-300 ${
+                      slotIndex === actualIndex
+                        ? "bg-primary text-white shadow-md"
+                        : "bg-blue-50 hover:bg-blue-100"
+                    }`}
+                  >
+                    <p className="font-semibold">
+                      {daysOfWeek[dateItem.datetime.getDay()]}
+                    </p>
+                    <p className="text-lg">{dateItem.datetime.getDate()}</p>
+                    <p className="text-xs">
+                      {dateItem.datetime.toLocaleDateString(undefined, {
+                        month: "short",
+                      })}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right arrow */}
+            <button
+              onClick={goToNextDateGroup}
+              disabled={mobileViewIndex >= totalMobileViews - 1}
+              className={`p-2 rounded-full ${
+                mobileViewIndex >= totalMobileViews - 1
+                  ? "text-gray-300"
+                  : "text-primary hover:bg-blue-50"
+              }`}
+            >
+              <ChevronRight size={24} />
+            </button>
+          </div>
+
+          {/* Date selection - Desktop view (all 7 days) */}
+          <div className="hidden md:flex md:gap-3 md:items-center md:w-full md:mb-6">
             {docSlots.length > 0 &&
               docSlots.map((item, index) => (
                 <div
                   onClick={() => setSlotIndex(index)}
                   key={index}
-                  className={`text-center py-4 px-2 min-w-16 rounded-xl cursor-pointer transition-all duration-300 ${
+                  className={`text-center py-4 px-2 flex-1 rounded-xl cursor-pointer transition-all duration-300 ${
                     slotIndex === index
                       ? "bg-primary text-white shadow-md transform scale-105"
                       : "border border-gray-200 hover:border-primary hover:bg-blue-50"
@@ -261,36 +393,101 @@ const Appointment = () => {
                 >
                   {item[0] && (
                     <>
-                      <p className="font-semibold">{daysOfWeek[item[0].datetime.getDay()]}</p>
-                      <p className="text-lg mt-1">{item[0].datetime.getDate()}</p>
+                      <p className="font-semibold">
+                        {daysOfWeek[item[0].datetime.getDay()]}
+                      </p>
+                      <p className="text-lg mt-1">
+                        {item[0].datetime.getDate()}
+                      </p>
+                      <p className="text-xs">
+                        {item[0].datetime.toLocaleDateString(undefined, {
+                          month: "short",
+                        })}
+                      </p>
                     </>
                   )}
                 </div>
               ))}
           </div>
-          
+
           <div className="mb-6">
-            <h4 className="flex items-center gap-2 text-gray-700 mb-3">
-              <Clock size={16} className="text-primary" /> Select Time
-            </h4>
-            <div className="flex flex-wrap gap-3 w-full">
-              {docSlots.length > 0 &&
-                docSlots[slotIndex]?.map((item, index) => (
+            <div className="flex justify-between items-center mb-3">
+              <h4 className="flex items-center gap-2 text-gray-700">
+                <Clock size={16} className="text-primary" /> Select Time
+              </h4>
+
+              {/* Mobile pagination controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2 md:hidden">
                   <button
-                    onClick={() => setSlotTime(item.time)}
-                    key={index}
-                    className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
-                      item.time === slotTime
-                        ? "bg-primary text-white shadow-md transform scale-105"
-                        : "bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-primary border border-gray-200"
+                    onClick={goToPreviousPage}
+                    disabled={currentSlotPage === 0}
+                    className={`p-1 rounded-full ${
+                      currentSlotPage === 0 ? "text-gray-300" : "text-primary"
                     }`}
                   >
-                    {item.time.toLowerCase()}
+                    <ChevronLeft size={20} />
                   </button>
-                ))}
+                  <span className="text-sm text-gray-600">
+                    {currentSlotPage + 1}/{totalPages}
+                  </span>
+                  <button
+                    onClick={goToNextPage}
+                    disabled={currentSlotPage >= totalPages - 1}
+                    className={`p-1 rounded-full ${
+                      currentSlotPage >= totalPages - 1
+                        ? "text-gray-300"
+                        : "text-primary"
+                    }`}
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-3 w-full">
+              {/* Show all slots on desktop, but paginate on mobile */}
+              {docSlots.length > 0 && (
+                <>
+                  {/* Mobile view (paginated in 3x3 grid) */}
+                  <div className="grid grid-cols-3 gap-2 w-full md:hidden">
+                    {getCurrentPageSlots().map((item, index) => (
+                      <button
+                        onClick={() => setSlotTime(item.time)}
+                        key={index}
+                        className={`px-2 py-2 rounded-lg text-sm transition-all duration-300 ${
+                          item.time === slotTime
+                            ? "bg-primary text-white shadow-md transform scale-105"
+                            : "bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-primary border border-gray-200"
+                        }`}
+                      >
+                        {item.time.toLowerCase()}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Desktop view (all slots) */}
+                  <div className="hidden md:flex md:flex-wrap gap-3 w-full">
+                    {docSlots[slotIndex]?.map((item, index) => (
+                      <button
+                        onClick={() => setSlotTime(item.time)}
+                        key={index}
+                        className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
+                          item.time === slotTime
+                            ? "bg-primary text-white shadow-md transform scale-105"
+                            : "bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-primary border border-gray-200"
+                        }`}
+                      >
+                        {item.time.toLowerCase()}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
-          
+
           <button
             onClick={bookAppointment}
             className="w-full sm:w-auto bg-primary text-white font-medium px-8 py-3 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"

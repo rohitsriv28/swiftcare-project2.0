@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
+import Fuse from "fuse.js";
 
 const changeAvailability = async (req, res) => {
   try {
@@ -282,6 +283,70 @@ const updateDoctorProfile = async (req, res) => {
   }
 };
 
+// API for fuzzy search doctors by name and speciality
+const searchDoctors = async (req, res) => {
+  try {
+    const { query } = req.body;
+
+    if (!query || query.trim() === "") {
+      return res.json({ success: true, doctors: [] });
+    }
+
+    // Get all doctors from database (without passwords)
+    const doctors = await doctorModel
+      .find({
+        availability: true, // Only search for available doctors
+      })
+      .select("-password");
+
+    // Configure fuse.js options
+    const options = {
+      keys: [
+        {
+          name: "name",
+          weight: 0.6,
+        },
+        {
+          name: "speciality",
+          weight: 0.4,
+        },
+      ],
+      includeScore: true,
+      threshold: 0.4, // Lower threshold means more strict matching
+      minMatchCharLength: 3,
+      ignoreLocation: true, // Search anywhere in the string
+      shouldSort: true,
+      includeMatches: true,
+    };
+
+    const fuse = new Fuse(doctors, options);
+
+    const results = fuse.search(query);
+
+    // Format the results to include only necessary data
+    const matchedDoctors = results.map((result) => ({
+      _id: result.item._id,
+      name: result.item.name,
+      speciality: result.item.speciality,
+      image: result.item.image,
+      fee: result.item.fee,
+      experience: result.item.experience,
+      score: result.score, // Lower score means better match
+    }));
+
+    res.json({
+      success: true,
+      doctors: matchedDoctors,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 export {
   changeAvailability,
   doctorList,
@@ -292,4 +357,5 @@ export {
   doctorDashboardData,
   doctorProfile,
   updateDoctorProfile,
+  searchDoctors,
 };

@@ -1,12 +1,12 @@
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXTwitter } from "@fortawesome/free-brands-svg-icons";
 import {
   Facebook,
-  Twitter,
   Instagram,
   Linkedin,
   Phone,
   Mail,
-  ArrowRight,
   Home,
   Info,
   FileText,
@@ -38,24 +38,28 @@ const Footer = () => {
             <div className="flex items-center gap-4 mt-4">
               <a
                 href="#"
+                aria-label="Facebook"
                 className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm hover:bg-primary hover:text-white transition-all"
               >
                 <Facebook size={18} />
               </a>
               <a
                 href="#"
+                aria-label="Twitter"
                 className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm hover:bg-primary hover:text-white transition-all"
               >
-                <Twitter size={18} />
+                <FontAwesomeIcon icon={faXTwitter} size="sm" />
               </a>
               <a
                 href="#"
+                aria-label="Instagram"
                 className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm hover:bg-primary hover:text-white transition-all"
               >
                 <Instagram size={18} />
               </a>
               <a
                 href="#"
+                aria-label="LinkedIn"
                 className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm hover:bg-primary hover:text-white transition-all"
               >
                 <Linkedin size={18} />
@@ -110,37 +114,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Services */}
-          <div className="md:col-span-2">
-            <h3 className="text-lg font-semibold text-gray-800 mb-5 relative inline-block">
-              SERVICES
-              <span className="absolute -bottom-1 left-0 w-1/2 h-0.5 bg-primary"></span>
-            </h3>
-
-            <ul className="flex flex-col gap-3 text-gray-600">
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Online Consultation
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Appointments
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Medical Reports
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Health Tips
-                </a>
-              </li>
-            </ul>
-          </div>
-
           {/* Contact Info */}
           <div className="md:col-span-2">
             <h3 className="text-lg font-semibold text-gray-800 mb-5 relative inline-block">
@@ -168,23 +141,6 @@ const Footer = () => {
                 </a>
               </li>
             </ul>
-
-            {/* Newsletter */}
-            <div className="mt-6">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">
-                Subscribe to our newsletter
-              </h4>
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Your Email"
-                  className="px-4 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary w-full"
-                />
-                <button className="bg-primary text-white rounded-r-lg px-3 flex items-center justify-center hover:bg-primary/90 transition-colors">
-                  <ArrowRight size={16} />
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
