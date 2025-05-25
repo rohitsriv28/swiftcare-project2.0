@@ -3,17 +3,18 @@ import { AppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Award, 
-  CreditCard, 
-  DollarSign, 
-  XCircle, 
-  CheckCircle, 
+import PaymentModal from "../components/PaymentModal";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Award,
+  CreditCard,
+  DollarSign,
+  XCircle,
+  CheckCircle,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 
 const MyAppointments = () => {
@@ -21,10 +22,12 @@ const MyAppointments = () => {
 
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
   const [processingPaymentId, setProcessingPaymentId] = useState(null);
   const navigate = useNavigate();
-  
+
   const months = [
     "",
     "Jan",
@@ -47,7 +50,7 @@ const MyAppointments = () => {
       dateArray[0] + " " + months[Number(dateArray[1])] + " " + dateArray[2]
     );
   };
-  
+
   const getUserAppointments = async () => {
     setLoading(true);
     try {
@@ -103,7 +106,7 @@ const MyAppointments = () => {
         try {
           setProcessingPaymentId(order.receipt);
           const { data } = await axios.post(
-            backendUrl + "/api/user/verify-payment",
+            backendUrl + "/api/user/verify-razorpay",
             response,
             { headers: { token } }
           );
@@ -142,32 +145,46 @@ const MyAppointments = () => {
       setProcessingPaymentId(null);
     }
   };
-  
+
+  const openPaymentModal = (appointment) => {
+    setSelectedAppointment(appointment);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    getUserAppointments();
+    // Close the modal after a delay to show the success message
+    setTimeout(() => {
+      setShowPaymentModal(false);
+      setSelectedAppointment(null);
+    }, 3000);
+  };
+
   useEffect(() => {
     if (token) {
       getUserAppointments();
     }
   }, [token]);
-  
+
   // Group appointments by status
   const getAppointmentsByStatus = () => {
     const upcoming = appointments.filter(
-      appointment => !appointment.isCancelled && !appointment.isComplete
+      (appointment) => !appointment.isCancelled && !appointment.isComplete
     );
-    
+
     const completed = appointments.filter(
-      appointment => !appointment.isCancelled && appointment.isComplete
+      (appointment) => !appointment.isCancelled && appointment.isComplete
     );
-    
+
     const cancelled = appointments.filter(
-      appointment => appointment.isCancelled
+      (appointment) => appointment.isCancelled
     );
-    
+
     return { upcoming, completed, cancelled };
   };
-  
+
   const { upcoming, completed, cancelled } = getAppointmentsByStatus();
-  
+
   // Status badge component
   const StatusBadge = ({ status, paymentMethod }) => {
     if (status === "completed") {
@@ -197,7 +214,7 @@ const MyAppointments = () => {
         </div>
       );
     }
-    
+
     return (
       <div className="flex items-center gap-2 text-sm font-medium text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
         <AlertTriangle size={14} />
@@ -211,7 +228,10 @@ const MyAppointments = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <Loader2 size={40} className="animate-spin text-primary mx-auto mb-4" />
+          <Loader2
+            size={40}
+            className="animate-spin text-primary mx-auto mb-4"
+          />
           <p className="text-gray-600">Loading your appointments...</p>
         </div>
       </div>
@@ -222,12 +242,15 @@ const MyAppointments = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl shadow-sm p-8">
         <Calendar size={64} className="text-gray-300 mb-4" />
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">No appointments found</h3>
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+          No appointments found
+        </h3>
         <p className="text-gray-600 text-center max-w-md mb-6">
-          You don't have any appointments scheduled. Book an appointment with one of our specialists to get started.
+          You don't have any appointments scheduled. Book an appointment with
+          one of our specialists to get started.
         </p>
-        <button 
-          onClick={() => navigate('/doctors')}
+        <button
+          onClick={() => navigate("/doctors")}
           className="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark transition-all duration-300"
         >
           Find a Doctor
@@ -245,7 +268,7 @@ const MyAppointments = () => {
         </h2>
         <div className="w-20 h-1 bg-primary mb-6"></div>
       </div>
-      
+
       {/* Upcoming Appointments */}
       {upcoming.length > 0 && (
         <div className="mb-10">
@@ -258,7 +281,9 @@ const MyAppointments = () => {
               <div
                 key={index}
                 className={`p-4 ${
-                  index !== upcoming.length - 1 ? "border-b border-gray-100" : ""
+                  index !== upcoming.length - 1
+                    ? "border-b border-gray-100"
+                    : ""
                 }`}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
@@ -272,7 +297,7 @@ const MyAppointments = () => {
                       />
                     </div>
                   </div>
-                  
+
                   {/* Appointment Info */}
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
@@ -282,26 +307,26 @@ const MyAppointments = () => {
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <Award size={14} className="text-primary" />
-                          <span className="text-gray-700">{item.docData.speciality}</span>
+                          <span className="text-gray-700">
+                            {item.docData.speciality}
+                          </span>
                         </div>
                       </div>
-                      
-                      <StatusBadge 
-                        status={item.payment ? "paid" : "pending"} 
-                      />
+
+                      <StatusBadge status={item.payment ? "paid" : "pending"} />
                     </div>
-                    
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mt-3">
                       <div className="flex items-center gap-2 text-gray-600">
                         <Calendar size={14} />
                         <span>{formattedSlotDate(item.slotDate)}</span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2 text-gray-600">
                         <Clock size={14} />
                         <span>{item.slotTime}</span>
                       </div>
-                      
+
                       <div className="flex items-start gap-2 text-gray-600 col-span-1 sm:col-span-2 mt-1">
                         <MapPin size={14} className="mt-0.5 flex-shrink-0" />
                         <div className="text-sm">
@@ -312,12 +337,12 @@ const MyAppointments = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Actions */}
                     <div className="flex flex-wrap items-center gap-3 mt-4">
                       {!item.payment && (
                         <button
-                          onClick={() => handlePayment(item._id)}
+                          onClick={() => openPaymentModal(item)}
                           disabled={processingPaymentId === item._id}
                           className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                         >
@@ -329,7 +354,7 @@ const MyAppointments = () => {
                           Pay Online
                         </button>
                       )}
-                      
+
                       <button
                         onClick={() => cancelAppointment(item._id)}
                         disabled={cancellingId === item._id}
@@ -350,7 +375,7 @@ const MyAppointments = () => {
           </div>
         </div>
       )}
-      
+
       {/* Completed Appointments */}
       {completed.length > 0 && (
         <div className="mb-10">
@@ -363,7 +388,9 @@ const MyAppointments = () => {
               <div
                 key={index}
                 className={`p-4 ${
-                  index !== completed.length - 1 ? "border-b border-gray-100" : ""
+                  index !== completed.length - 1
+                    ? "border-b border-gray-100"
+                    : ""
                 }`}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
@@ -377,7 +404,7 @@ const MyAppointments = () => {
                       />
                     </div>
                   </div>
-                  
+
                   {/* Appointment Info */}
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
@@ -387,27 +414,31 @@ const MyAppointments = () => {
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <Award size={14} className="text-primary" />
-                          <span className="text-gray-700">{item.docData.speciality}</span>
+                          <span className="text-gray-700">
+                            {item.docData.speciality}
+                          </span>
                         </div>
                       </div>
-                      
-                      <StatusBadge 
-                        status="completed" 
-                        paymentMethod={item.payment ? "Online Payment" : "Cash Payment"}
+
+                      <StatusBadge
+                        status="completed"
+                        paymentMethod={
+                          item.payment ? "Online Payment" : "Cash Payment"
+                        }
                       />
                     </div>
-                    
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mt-3">
                       <div className="flex items-center gap-2 text-gray-600">
                         <Calendar size={14} />
                         <span>{formattedSlotDate(item.slotDate)}</span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2 text-gray-600">
                         <Clock size={14} />
                         <span>{item.slotTime}</span>
                       </div>
-                      
+
                       <div className="flex items-start gap-2 text-gray-600 col-span-1 sm:col-span-2 mt-1">
                         <MapPin size={14} className="mt-0.5 flex-shrink-0" />
                         <div className="text-sm">
@@ -425,7 +456,7 @@ const MyAppointments = () => {
           </div>
         </div>
       )}
-      
+
       {/* Cancelled Appointments */}
       {cancelled.length > 0 && (
         <div>
@@ -438,7 +469,9 @@ const MyAppointments = () => {
               <div
                 key={index}
                 className={`p-4 ${
-                  index !== cancelled.length - 1 ? "border-b border-gray-100" : ""
+                  index !== cancelled.length - 1
+                    ? "border-b border-gray-100"
+                    : ""
                 }`}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
@@ -452,7 +485,7 @@ const MyAppointments = () => {
                       />
                     </div>
                   </div>
-                  
+
                   {/* Appointment Info */}
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
@@ -462,28 +495,32 @@ const MyAppointments = () => {
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <Award size={14} className="text-gray-500" />
-                          <span className="text-gray-600">{item.docData.speciality}</span>
+                          <span className="text-gray-600">
+                            {item.docData.speciality}
+                          </span>
                         </div>
                       </div>
-                      
+
                       <StatusBadge status="cancelled" />
                     </div>
-                    
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mt-3">
                       <div className="flex items-center gap-2 text-gray-500">
                         <Calendar size={14} />
                         <span>{formattedSlotDate(item.slotDate)}</span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2 text-gray-500">
                         <Clock size={14} />
                         <span>{item.slotTime}</span>
                       </div>
                     </div>
-                    
+
                     <div className="mt-4">
                       <button
-                        onClick={() => navigate(`/appointment/${item.docData._id}`)}
+                        onClick={() =>
+                          navigate(`/appointment/${item.docData._id}`)
+                        }
                         className="flex items-center gap-2 border border-primary text-primary px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary hover:text-white transition-all"
                       >
                         <Calendar size={14} />
@@ -496,6 +533,20 @@ const MyAppointments = () => {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Payment Modal */}
+      {selectedAppointment && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setSelectedAppointment(null);
+          }}
+          amount={selectedAppointment.docData.fee || 1000}
+          appointmentId={selectedAppointment._id}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
       )}
     </div>
   );

@@ -324,15 +324,20 @@ function getLast30DaysAppointments(appointments) {
     const dateString = `${day}_${month}_${year}`;
     const displayDate = `${day}/${month}`;
 
-    const dayAppointments = appointments.filter(
-      (app) => app.slotDate === dateString && !app.isCancelled && app.payment // Only count paid appointments
+    const allDayAppointments = appointments.filter(
+      (app) => app.slotDate === dateString && !app.isCancelled
+    );
+
+    const paidDayAppointments = appointments.filter(
+      (app) => app.slotDate === dateString && !app.isCancelled && app.payment
     );
 
     result.push({
       date: dateString,
       displayDate,
-      appointments: dayAppointments.length,
-      revenue: dayAppointments.reduce((sum, app) => sum + app.amount, 0),
+      allAppointments: allDayAppointments.length,
+      paidAppointments: paidDayAppointments.length,
+      revenue: paidDayAppointments.reduce((sum, app) => sum + app.amount, 0),
     });
   }
 

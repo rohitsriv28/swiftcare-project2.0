@@ -1,3 +1,4 @@
+// AppContext.jsx
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -6,14 +7,13 @@ export const AppContext = createContext();
 
 const AppContextProvider = (props) => {
   const currencySymbol = "रु.";
-  // const currencySymbol = "₹";
-
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [doctors, setDoctors] = useState([]);
   const [token, setToken] = useState(
     localStorage.getItem("token") ? localStorage.getItem("token") : false
   );
   const [userData, setUserData] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState(null);
 
   const getDoctorsData = async () => {
     try {
@@ -55,8 +55,10 @@ const AppContextProvider = (props) => {
     userData,
     setUserData,
     getUserData,
+    paymentStatus,
+    setPaymentStatus,
   };
-  
+
   useEffect(() => {
     getDoctorsData();
   }, []);

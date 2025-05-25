@@ -179,7 +179,7 @@ const Dashboard = () => {
               <h2 className="text-lg font-medium">Appointments Over Time</h2>
             </div>
             <div className="text-sm text-gray-500">
-              Paid appointments only
+              All non-cancelled appointments
             </div>
           </div>
           <div className="h-64">
@@ -201,7 +201,7 @@ const Dashboard = () => {
                 <Legend />
                 <Line
                   type="monotone"
-                  dataKey="appointments"
+                  dataKey="allAppointments"
                   stroke="#8884d8"
                   activeDot={{ r: 8 }}
                   name="Appointments"
@@ -219,9 +219,7 @@ const Dashboard = () => {
               <TrendingUp className="h-5 w-5 text-gray-500 mr-2" />
               <h2 className="text-lg font-medium">Revenue Over Time</h2>
             </div>
-            <div className="text-sm text-gray-500">
-              Paid appointments only
-            </div>
+            <div className="text-sm text-gray-500">Paid appointments only</div>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -261,9 +259,7 @@ const Dashboard = () => {
               <PieChart className="h-5 w-5 text-gray-500 mr-2" />
               <h2 className="text-lg font-medium">Appointments by Specialty</h2>
             </div>
-            <div className="text-sm text-gray-500">
-              Paid appointments only
-            </div>
+            <div className="text-sm text-gray-500">Paid appointments only</div>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -307,9 +303,7 @@ const Dashboard = () => {
               <BarChart2 className="h-5 w-5 text-gray-500 mr-2" />
               <h2 className="text-lg font-medium">Revenue by Specialty</h2>
             </div>
-            <div className="text-sm text-gray-500">
-              Paid appointments only
-            </div>
+            <div className="text-sm text-gray-500">Paid appointments only</div>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -346,9 +340,7 @@ const Dashboard = () => {
               <Stethoscope className="h-5 w-5 text-gray-500 mr-2" />
               <h2 className="text-lg font-medium">Top Performing Doctors</h2>
             </div>
-            <div className="text-sm text-gray-500">
-              Paid appointments only
-            </div>
+            <div className="text-sm text-gray-500">Paid appointments only</div>
           </div>
           <div className="space-y-4">
             {dashboardData.topDoctors && dashboardData.topDoctors.length > 0 ? (

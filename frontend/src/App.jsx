@@ -1,3 +1,4 @@
+// App.jsx
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -10,6 +11,7 @@ import Contact from "./pages/Contact";
 import MyProfile from "./pages/MyProfile";
 import MyAppointments from "./pages/MyAppointments";
 import Appointment from "./pages/Appointment";
+import VerifyKhalti from "./components/VerifyKhalti";
 import Footer from "./components/Footer";
 
 const App = () => {
@@ -20,7 +22,6 @@ const App = () => {
         <Navbar />
       </div>
 
-      {/* Main content with flex-grow to push footer down */}
       <main className="flex-grow px-4 sm:px-[10%]">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/my-profile" element={<MyProfile />} />
           <Route path="/my-appointments" element={<MyAppointments />} />
           <Route path="/appointment/:docId" element={<Appointment />} />
+          <Route path="/verify-khalti" element={<VerifyKhalti />} />
         </Routes>
       </main>
 
