@@ -40,16 +40,58 @@ const addDoctor = async (req, res) => {
         .json({ success: false, message: "All fields are required" });
     }
 
-    // email validation
-    if (!validator.isEmail(email)) {
-      return res.status(400).json({ success: false, message: "Invalid email" });
+    // Name validation - should not contain numbers
+    if (/\d/.test(name)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Name should not contain numbers" });
     }
 
-    // password validation
+    // Email validation
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ success: false, message: "Invalid email format" });
+    }
+
+    // Password validation
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
-        message: "Password must be atleast 6 characters",
+        message: "Password must be at least 8 characters",
+      });
+    }
+
+    // Degree validation - should only contain alphabets, spaces, periods, and commas, and start with alphabet
+    if (!/^[A-Za-z][A-Za-z\s.,]*$/.test(degree)) {
+      return res.status(400).json({
+        success: false,
+        message: "Degree should only contain alphabets, spaces, periods, commas and must start with an alphabet",
+      });
+    }
+
+    // Fee validation - should not be negative
+    const feeNumber = parseFloat(fee);
+    if (isNaN(feeNumber) || feeNumber < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Fee cannot be negative or non-numeric",
+      });
+    }
+
+    // Image file validation
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (!allowedMimeTypes.includes(imageFile.mimetype)) {
+      return res.status(400).json({
+        success: false,
+        message: "Image must be in JPEG, PNG, or WebP format",
+      });
+    }
+    
+    // Size validation (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (imageFile.size > maxSize) {
+      return res.status(400).json({
+        success: false,
+        message: "Image size should not exceed 5MB",
       });
     }
 
@@ -57,6 +99,15 @@ const addDoctor = async (req, res) => {
     // hashing doc password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Check if doctor with same email already exists
+    const existingDoctor = await doctorModel.findOne({ email });
+    if (existingDoctor) {
+      return res.status(400).json({
+        success: false,
+        message: "A doctor with this email already exists",
+      });
+    }
 
     // uploading image to cloudinary
     const uploadedImage = await cloudinary.uploader.upload(imageFile.path, {
@@ -74,7 +125,7 @@ const addDoctor = async (req, res) => {
       experience,
       degree,
       about,
-      fee,
+      fee: feeNumber, // Using the parsed numeric value
       address: typeof address === "string" ? JSON.parse(address) : address,
       date: Date.now(),
       image: imageUrl,
@@ -88,8 +139,7 @@ const addDoctor = async (req, res) => {
     console.log("Error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
-      // "Internal server error"
+      message: error.message || "Internal server error",
     });
   }
 };

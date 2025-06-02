@@ -327,15 +327,7 @@ const MyAppointments = () => {
                         <span>{item.slotTime}</span>
                       </div>
 
-                      <div className="flex items-start gap-2 text-gray-600 col-span-1 sm:col-span-2 mt-1">
-                        <MapPin size={14} className="mt-0.5 flex-shrink-0" />
-                        <div className="text-sm">
-                          {item.docData.address?.line1}
-                          {item.docData.address?.line2 && (
-                            <span>, {item.docData.address.line2}</span>
-                          )}
-                        </div>
-                      </div>
+                      
                     </div>
 
                     {/* Actions */}

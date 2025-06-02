@@ -1,5 +1,4 @@
 import React, { useContext, useState } from "react";
-import { assets } from "../../assets/assets";
 import { AdminContext } from "../../context/AdminContext";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -8,7 +7,6 @@ import {
   Mail,
   Lock,
   Award,
-  DollarSign,
   Stethoscope,
   GraduationCap,
   Info,
@@ -45,33 +43,153 @@ const AddDoctor = () => {
       [name]: value,
     }));
 
-    // Clear error when user starts typing
+    // Clear error when user starts typing and validate field
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
         [name]: "",
       }));
     }
+
+    // Real-time validation for specific fields
+    validateField(name, value);
+  };
+
+  const validateField = (fieldName, value) => {
+    const newErrors = { ...errors };
+
+    switch (fieldName) {
+      case "name":
+        if (!value.trim()) {
+          newErrors.name = "Name is required";
+        } else if (/\d/.test(value)) {
+          newErrors.name = "Name should not contain numbers";
+        } else {
+          delete newErrors.name;
+        }
+        break;
+
+      case "email":
+        if (!value.trim()) {
+          newErrors.email = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors.email = "Please enter a valid email address";
+        } else {
+          delete newErrors.email;
+        }
+        break;
+
+      case "password":
+        if (!value) {
+          newErrors.password = "Password is required";
+        } else if (value.length < 8) {
+          newErrors.password = "Password must be at least 8 characters long";
+        } else {
+          delete newErrors.password;
+        }
+        break;
+
+      case "degree":
+        if (!value.trim()) {
+          newErrors.degree = "Degree is required";
+        } else if (!/^[A-Za-z][A-Za-z\s.,]*$/.test(value)) {
+          newErrors.degree =
+            "Degree should only contain alphabets, spaces, periods, commas and must start with an alphabet";
+        } else {
+          delete newErrors.degree;
+        }
+        break;
+
+      case "fees":
+        if (!value) {
+          newErrors.fees = "Fee is required";
+        } else {
+          const feeNumber = parseFloat(value);
+          if (isNaN(feeNumber) || feeNumber < 0) {
+            newErrors.fees = "Fee cannot be negative or non-numeric";
+          } else {
+            delete newErrors.fees;
+          }
+        }
+        break;
+
+      case "about":
+        if (!value.trim()) {
+          newErrors.about = "About information is required";
+        } else if (value.trim().length < 50) {
+          newErrors.about =
+            "Please provide at least 50 characters of information";
+        } else {
+          delete newErrors.about;
+        }
+        break;
+
+      case "address1":
+        if (!value.trim()) {
+          newErrors.address1 = "Address line 1 is required";
+        } else {
+          delete newErrors.address1;
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors(newErrors);
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    else if (!/^\S+@\S+\.\S+$/.test(formData.email))
-      newErrors.email = "Email is invalid";
 
-    if (!formData.password) newErrors.password = "Password is required";
-    else if (formData.password.length < 8)
-      newErrors.password = "Password must be at least 8 characters";
+    // Validate all fields
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    } else if (/\d/.test(formData.name)) {
+      newErrors.name = "Name should not contain numbers";
+    }
 
-    if (!formData.degree.trim()) newErrors.degree = "Degree is required";
-    if (!formData.about.trim())
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long";
+    }
+
+    if (!formData.degree.trim()) {
+      newErrors.degree = "Degree is required";
+    } else if (!/^[A-Za-z][A-Za-z\s.,]*$/.test(formData.degree)) {
+      newErrors.degree =
+        "Degree should only contain alphabets, spaces, periods, commas and must start with an alphabet";
+    }
+
+    if (!formData.about.trim()) {
       newErrors.about = "About information is required";
-    if (!formData.fees) newErrors.fees = "Fee is required";
-    if (!formData.address1.trim())
+    } else if (formData.about.trim().length < 50) {
+      newErrors.about = "Please provide at least 50 characters of information";
+    }
+
+    if (!formData.fees) {
+      newErrors.fees = "Fee is required";
+    } else {
+      const feeNumber = parseFloat(formData.fees);
+      if (isNaN(feeNumber) || feeNumber < 0) {
+        newErrors.fees = "Fee cannot be negative or non-numeric";
+      }
+    }
+
+    if (!formData.address1.trim()) {
       newErrors.address1 = "Address line 1 is required";
-    if (!docImg) newErrors.image = "Doctor's image is required";
+    }
+
+    if (!docImg) {
+      newErrors.image = "Doctor's image is required";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -81,15 +199,28 @@ const AddDoctor = () => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
 
-      // Validate file type
-      if (!selectedFile.type.match("image.*")) {
-        toast.error("Please select an image file");
+      // Validate image file
+      const allowedMimeTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
+      ];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+
+      if (!allowedMimeTypes.includes(selectedFile.type)) {
+        setErrors((prev) => ({
+          ...prev,
+          image: "Image must be in JPEG, PNG, JPG, or WebP format",
+        }));
         return;
       }
 
-      // Validate file size (max 5MB)
-      if (selectedFile.size > 5 * 1024 * 1024) {
-        toast.error("Image size should be less than 5MB");
+      if (selectedFile.size > maxSize) {
+        setErrors((prev) => ({
+          ...prev,
+          image: "Image size should not exceed 5MB",
+        }));
         return;
       }
 
@@ -119,7 +250,7 @@ const AddDoctor = () => {
     event.preventDefault();
 
     if (!validateForm()) {
-      toast.error("Please fill all required fields correctly");
+      // Don't show toast for validation errors - they're already shown below fields
       return;
     }
 
@@ -132,7 +263,7 @@ const AddDoctor = () => {
       formDataToSend.append("email", formData.email);
       formDataToSend.append("password", formData.password);
       formDataToSend.append("experience", formData.experience);
-      formDataToSend.append("fee", Number(formData.fees));
+      formDataToSend.append("fee", formData.fees);
       formDataToSend.append("speciality", formData.speciality);
       formDataToSend.append("degree", formData.degree);
       formDataToSend.append("about", formData.about);
@@ -150,14 +281,43 @@ const AddDoctor = () => {
       if (data.success) {
         toast.success(data.message);
         clearForm();
-        // Refresh doctors list
         getAllDoctors();
-      } else {
-        toast.error(data.message);
       }
     } catch (error) {
       console.error("Error adding doctor:", error);
-      toast.error(error.response?.data?.message || "Failed to add doctor");
+
+      // Handle server validation errors
+      if (error.response?.status === 400 && error.response?.data?.message) {
+        const serverMessage = error.response.data.message;
+
+        // Check if it's a specific field error that we should show below the field
+        if (serverMessage.includes("email already exists")) {
+          setErrors((prev) => ({ ...prev, email: serverMessage }));
+        } else if (serverMessage.includes("Name should not contain numbers")) {
+          setErrors((prev) => ({ ...prev, name: serverMessage }));
+        } else if (serverMessage.includes("Invalid email format")) {
+          setErrors((prev) => ({ ...prev, email: serverMessage }));
+        } else if (
+          serverMessage.includes("Password must be at least 8 characters")
+        ) {
+          setErrors((prev) => ({ ...prev, password: serverMessage }));
+        } else if (serverMessage.includes("Degree should only contain")) {
+          setErrors((prev) => ({ ...prev, degree: serverMessage }));
+        } else if (serverMessage.includes("Fee cannot be negative")) {
+          setErrors((prev) => ({ ...prev, fees: serverMessage }));
+        } else if (
+          serverMessage.includes("Image must be in") ||
+          serverMessage.includes("Image size")
+        ) {
+          setErrors((prev) => ({ ...prev, image: serverMessage }));
+        } else {
+          // Show generic server errors in toast
+          toast.error(serverMessage);
+        }
+      } else {
+        // Show network/server errors in toast
+        toast.error("Failed to add doctor. Please try again.");
+      }
     } finally {
       setIsUploading(false);
     }
@@ -205,7 +365,9 @@ const AddDoctor = () => {
       <form className="bg-white px-6 py-8 rounded-lg shadow-sm border w-full max-w-4xl mx-auto">
         {/* Doctor Image Upload */}
         <div className="mb-8">
-          <p className="text-gray-700 font-medium mb-2">Doctor's Photo</p>
+          <p className="text-gray-700 font-medium mb-2">
+            Doctor's Photo <span className="text-red-500">*</span>
+          </p>
           <div className="flex items-center gap-4">
             <div
               className={`relative w-24 h-24 rounded-full flex items-center justify-center overflow-hidden
@@ -225,7 +387,13 @@ const AddDoctor = () => {
                   />
                   <button
                     type="button"
-                    onClick={() => setDocImg(null)}
+                    onClick={() => {
+                      setDocImg(null);
+                      setErrors((prev) => ({
+                        ...prev,
+                        image: "Doctor's image is required",
+                      }));
+                    }}
                     className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                   >
                     <X size={14} />
@@ -251,14 +419,14 @@ const AddDoctor = () => {
                 onChange={handleImageChange}
                 className="hidden"
               />
-              {errors.image && (
-                <p className="mt-1 text-red-500 text-xs">{errors.image}</p>
-              )}
               <p className="text-xs text-gray-500 mt-1">
-                Upload a professional headshot (Max: 5MB)
+                Upload a professional headshot (Max: 5MB, JPEG/PNG/WebP)
               </p>
             </div>
           </div>
+          {errors.image && (
+            <p className="mt-2 text-red-500 text-sm">{errors.image}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
@@ -283,7 +451,7 @@ const AddDoctor = () => {
               />
             </div>
             {errors.name && (
-              <p className="mt-1 text-red-500 text-xs">{errors.name}</p>
+              <p className="mt-1 text-red-500 text-sm">{errors.name}</p>
             )}
           </div>
 
@@ -308,7 +476,7 @@ const AddDoctor = () => {
               />
             </div>
             {errors.email && (
-              <p className="mt-1 text-red-500 text-xs">{errors.email}</p>
+              <p className="mt-1 text-red-500 text-sm">{errors.email}</p>
             )}
           </div>
 
@@ -324,7 +492,7 @@ const AddDoctor = () => {
               <input
                 type="password"
                 name="password"
-                placeholder="Minimum 8 characters"
+                placeholder="Enter password (min 8 characters)"
                 value={formData.password}
                 onChange={handleChange}
                 className={`border ${
@@ -333,7 +501,7 @@ const AddDoctor = () => {
               />
             </div>
             {errors.password && (
-              <p className="mt-1 text-red-500 text-xs">{errors.password}</p>
+              <p className="mt-1 text-red-500 text-sm">{errors.password}</p>
             )}
           </div>
 
@@ -398,6 +566,8 @@ const AddDoctor = () => {
                 type="number"
                 name="fees"
                 placeholder="Enter fee amount"
+                min="0"
+                step="0.01"
                 value={formData.fees}
                 onChange={handleChange}
                 className={`border ${
@@ -406,7 +576,7 @@ const AddDoctor = () => {
               />
             </div>
             {errors.fees && (
-              <p className="mt-1 text-red-500 text-xs">{errors.fees}</p>
+              <p className="mt-1 text-red-500 text-sm">{errors.fees}</p>
             )}
           </div>
 
@@ -431,7 +601,7 @@ const AddDoctor = () => {
               />
             </div>
             {errors.degree && (
-              <p className="mt-1 text-red-500 text-xs">{errors.degree}</p>
+              <p className="mt-1 text-red-500 text-sm">{errors.degree}</p>
             )}
           </div>
 
@@ -456,7 +626,7 @@ const AddDoctor = () => {
               />
             </div>
             {errors.address1 && (
-              <p className="mt-1 text-red-500 text-xs">{errors.address1}</p>
+              <p className="mt-1 text-red-500 text-sm">{errors.address1}</p>
             )}
           </div>
 
@@ -492,7 +662,7 @@ const AddDoctor = () => {
             </div>
             <textarea
               name="about"
-              placeholder="Professional experience, specializations, and approach to patient care"
+              placeholder="Professional experience, specializations, and approach to patient care (minimum 50 characters)"
               rows={5}
               value={formData.about}
               onChange={handleChange}
@@ -502,8 +672,11 @@ const AddDoctor = () => {
             ></textarea>
           </div>
           {errors.about && (
-            <p className="mt-1 text-red-500 text-xs">{errors.about}</p>
+            <p className="mt-1 text-red-500 text-sm">{errors.about}</p>
           )}
+          <p className="mt-1 text-xs text-gray-500">
+            {formData.about.length}/50 characters minimum
+          </p>
         </div>
 
         {/* Action Buttons */}

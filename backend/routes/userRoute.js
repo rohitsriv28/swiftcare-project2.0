@@ -12,9 +12,7 @@ import authUser from "../middleware/authUser.js";
 import upload from "../middleware/multer.js";
 import {
   initiateKhaltiPayment,
-  // payWithEsewa,
   payWithRazorpay,
-  // verifyEsewaPayment,
   verifyKhaltiPayment,
   verifyRazorpayPayment,
 } from "../controllers/paymentController.js";
@@ -31,13 +29,11 @@ userRouter.post(
   authUser,
   updateProfile
 );
-userRouter.post("/search-doctors", authUser, searchDoctors);
+userRouter.post("/search-doctors", searchDoctors);
 userRouter.post("/book-appointment", authUser, bookAppointment);
 userRouter.get("/appointments", authUser, listAppointments);
 userRouter.post("/cancel-appointment", authUser, cancelAppointment);
 // Payment routes
-// userRouter.post("/pay-with-esewa", authUser, payWithEsewa);
-// userRouter.post("/verify-esewa", authUser, verifyEsewaPayment);
 userRouter.post("/pay-with-khalti", authUser, initiateKhaltiPayment);
 userRouter.post("/verify-khalti", authUser, verifyKhaltiPayment);
 userRouter.post("/pay-with-razorpay", authUser, payWithRazorpay);
