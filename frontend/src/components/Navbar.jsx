@@ -14,6 +14,7 @@ import {
   Calendar,
   LogOut,
   Search,
+  Mail,
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -105,26 +106,26 @@ const Navbar = () => {
   };
 
   const handleDoctorClick = (doctorId) => {
-  if (!doctorId) return;
+    if (!doctorId) return;
 
-  // Reset search state
-  setSearchQuery("");
-  setShowSearchResults(false);
-  setShowMenu(false);
+    // Reset search state
+    setSearchQuery("");
+    setShowSearchResults(false);
+    setShowMenu(false);
 
-  // Navigate directly (no need for timeout if using Solution #1)
-  navigate(`/appointment/${doctorId}`);
-};
+    // Navigate directly (no need for timeout if using Solution #1)
+    navigate(`/appointment/${doctorId}`);
+  };
 
   return (
-    <div className="sticky rounded-md top-0 z-50 bg-white shadow-md px-4 md:px-6 mb-2">
-      <div className="max-w-7xl mx-auto flex items-center justify-between h-16">
+    <div className="sticky top-0 z-50 bg-white border-b border-gray-100 mb-2">
+      <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 md:px-6">
         {/* Logo */}
         <div
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 cursor-pointer"
+          className="flex items-center gap-2 cursor-pointer group"
         >
-          <span className="text-primary font-bold text-xl md:text-2xl">
+          <span className="text-primary font-bold text-xl md:text-2xl tracking-tight">
             SwiftCare
           </span>
         </div>
@@ -134,19 +135,19 @@ const Navbar = () => {
           className="relative w-full max-w-xs md:max-w-md mx-2 md:mx-4"
           ref={searchRef}
         >
-          <div className="relative">
+          <div className="relative group">
             <input
               type="text"
               placeholder="Search doctors..."
-              className="w-full py-1.5 pl-8 pr-3 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              className="w-full py-2 pl-9 pr-4 text-sm bg-[#F7F9FC] border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
               onFocus={() => searchQuery.trim() && handleSearch()}
             />
             <Search
-              size={14}
-              className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={15}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-primary transition-colors"
               onClick={handleSearch}
             />
             {isSearching && (
@@ -301,9 +302,8 @@ const Navbar = () => {
                 </div>
                 <ChevronDown
                   size={14}
-                  className={`hidden md:block text-gray-700 transition-transform duration-300 ${
-                    showDropdown ? "transform rotate-180" : ""
-                  }`}
+                  className={`hidden md:block text-gray-700 transition-transform duration-300 ${showDropdown ? "transform rotate-180" : ""
+                    }`}
                 />
               </div>
 
@@ -363,11 +363,10 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`${
-          showMenu
-            ? "fixed inset-0 z-50 bg-white transform translate-x-0"
-            : "fixed inset-0 z-50 bg-white transform translate-x-full"
-        } transition-transform duration-300 ease-in-out md:hidden`}
+        className={`${showMenu
+          ? "fixed inset-0 z-50 bg-white transform translate-x-0"
+          : "fixed inset-0 z-50 bg-white transform translate-x-full"
+          } transition-transform duration-300 ease-in-out md:hidden`}
       >
         <div className="flex items-center justify-between p-4 border-b">
           <span className="text-primary font-bold text-xl">SwiftCare</span>
@@ -385,10 +384,9 @@ const Navbar = () => {
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `flex items-center gap-3 p-2.5 rounded-lg ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-gray-700 hover:bg-gray-50"
+                `flex items-center gap-3 p-2.5 rounded-lg ${isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-gray-700 hover:bg-gray-50"
                 }`
               }
               onClick={() => setShowMenu(false)}
@@ -400,10 +398,9 @@ const Navbar = () => {
             <NavLink
               to="/doctors"
               className={({ isActive }) =>
-                `flex items-center gap-3 p-2.5 rounded-lg ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-gray-700 hover:bg-gray-50"
+                `flex items-center gap-3 p-2.5 rounded-lg ${isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-gray-700 hover:bg-gray-50"
                 }`
               }
               onClick={() => setShowMenu(false)}
@@ -415,10 +412,9 @@ const Navbar = () => {
             <NavLink
               to="/about"
               className={({ isActive }) =>
-                `flex items-center gap-3 p-2.5 rounded-lg ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-gray-700 hover:bg-gray-50"
+                `flex items-center gap-3 p-2.5 rounded-lg ${isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-gray-700 hover:bg-gray-50"
                 }`
               }
               onClick={() => setShowMenu(false)}
@@ -430,10 +426,9 @@ const Navbar = () => {
             <NavLink
               to="/contact"
               className={({ isActive }) =>
-                `flex items-center gap-3 p-2.5 rounded-lg ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-gray-700 hover:bg-gray-50"
+                `flex items-center gap-3 p-2.5 rounded-lg ${isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-gray-700 hover:bg-gray-50"
                 }`
               }
               onClick={() => setShowMenu(false)}
@@ -448,10 +443,9 @@ const Navbar = () => {
                 <NavLink
                   to="/my-profile"
                   className={({ isActive }) =>
-                    `flex items-center gap-3 p-2.5 rounded-lg ${
-                      isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-gray-700 hover:bg-gray-50"
+                    `flex items-center gap-3 p-2.5 rounded-lg ${isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-gray-700 hover:bg-gray-50"
                     }`
                   }
                   onClick={() => setShowMenu(false)}
@@ -463,10 +457,9 @@ const Navbar = () => {
                 <NavLink
                   to="/my-appointments"
                   className={({ isActive }) =>
-                    `flex items-center gap-3 p-2.5 rounded-lg ${
-                      isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-gray-700 hover:bg-gray-50"
+                    `flex items-center gap-3 p-2.5 rounded-lg ${isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-gray-700 hover:bg-gray-50"
                     }`
                   }
                   onClick={() => setShowMenu(false)}

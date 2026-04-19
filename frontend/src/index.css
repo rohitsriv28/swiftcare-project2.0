@@ -1,8 +1,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap");
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1f2a44;
+  --color-secondary: #2bb0a8;
+  --color-accent: #6fa8ff;
+  --color-bg-light: #f7f9fc;
+  --color-bg-dark: #0f172a;
+  --color-surface-light: #ffffff;
+  --color-surface-dark: #1e293b;
+  --color-text-main: #0b1324;
+  --color-text-inverted: #e5e7eb;
+  --color-text-muted: #64748b;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-error: #dc2626;
+}
 
 * {
   font-family: Fraunces;

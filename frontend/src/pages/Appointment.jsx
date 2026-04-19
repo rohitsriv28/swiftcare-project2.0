@@ -322,11 +322,10 @@ const Appointment = () => {
             <button
               onClick={goToPreviousDateGroup}
               disabled={mobileViewIndex === 0}
-              className={`p-2 rounded-full ${
-                mobileViewIndex === 0
+              className={`p-2 rounded-full ${mobileViewIndex === 0
                   ? "text-gray-300"
                   : "text-primary hover:bg-blue-50"
-              }`}
+                }`}
             >
               <ChevronLeft size={24} />
             </button>
@@ -344,11 +343,10 @@ const Appointment = () => {
                   <div
                     key={index}
                     onClick={() => setSlotIndex(actualIndex)}
-                    className={`flex-1 text-center py-3 px-1 rounded-xl cursor-pointer transition-all duration-300 ${
-                      slotIndex === actualIndex
+                    className={`flex-1 text-center py-3 px-1 rounded-xl cursor-pointer transition-all duration-300 ${slotIndex === actualIndex
                         ? "bg-primary text-white shadow-md"
                         : "bg-blue-50 hover:bg-blue-100"
-                    }`}
+                      }`}
                   >
                     <p className="font-semibold">
                       {daysOfWeek[dateItem.datetime.getDay()]}
@@ -368,11 +366,10 @@ const Appointment = () => {
             <button
               onClick={goToNextDateGroup}
               disabled={mobileViewIndex >= totalMobileViews - 1}
-              className={`p-2 rounded-full ${
-                mobileViewIndex >= totalMobileViews - 1
+              className={`p-2 rounded-full ${mobileViewIndex >= totalMobileViews - 1
                   ? "text-gray-300"
                   : "text-primary hover:bg-blue-50"
-              }`}
+                }`}
             >
               <ChevronRight size={24} />
             </button>
@@ -385,11 +382,10 @@ const Appointment = () => {
                 <div
                   onClick={() => setSlotIndex(index)}
                   key={index}
-                  className={`text-center py-4 px-2 flex-1 rounded-xl cursor-pointer transition-all duration-300 ${
-                    slotIndex === index
+                  className={`text-center py-4 px-2 flex-1 rounded-xl cursor-pointer transition-all duration-300 ${slotIndex === index
                       ? "bg-primary text-white shadow-md transform scale-105"
                       : "border border-gray-200 hover:border-primary hover:bg-blue-50"
-                  }`}
+                    }`}
                 >
                   {item[0] && (
                     <>
@@ -422,9 +418,8 @@ const Appointment = () => {
                   <button
                     onClick={goToPreviousPage}
                     disabled={currentSlotPage === 0}
-                    className={`p-1 rounded-full ${
-                      currentSlotPage === 0 ? "text-gray-300" : "text-primary"
-                    }`}
+                    className={`p-1 rounded-full ${currentSlotPage === 0 ? "text-gray-300" : "text-primary"
+                      }`}
                   >
                     <ChevronLeft size={20} />
                   </button>
@@ -434,11 +429,10 @@ const Appointment = () => {
                   <button
                     onClick={goToNextPage}
                     disabled={currentSlotPage >= totalPages - 1}
-                    className={`p-1 rounded-full ${
-                      currentSlotPage >= totalPages - 1
+                    className={`p-1 rounded-full ${currentSlotPage >= totalPages - 1
                         ? "text-gray-300"
                         : "text-primary"
-                    }`}
+                      }`}
                   >
                     <ChevronRight size={20} />
                   </button>
@@ -456,11 +450,10 @@ const Appointment = () => {
                       <button
                         onClick={() => setSlotTime(item.time)}
                         key={index}
-                        className={`px-2 py-2 rounded-lg text-sm transition-all duration-300 ${
-                          item.time === slotTime
+                        className={`px-2 py-2 rounded-lg text-sm transition-all duration-300 ${item.time === slotTime
                             ? "bg-primary text-white shadow-md transform scale-105"
                             : "bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-primary border border-gray-200"
-                        }`}
+                          }`}
                       >
                         {item.time.toLowerCase()}
                       </button>
@@ -473,11 +466,10 @@ const Appointment = () => {
                       <button
                         onClick={() => setSlotTime(item.time)}
                         key={index}
-                        className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${
-                          item.time === slotTime
+                        className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${item.time === slotTime
                             ? "bg-primary text-white shadow-md transform scale-105"
                             : "bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-primary border border-gray-200"
-                        }`}
+                          }`}
                       >
                         {item.time.toLowerCase()}
                       </button>

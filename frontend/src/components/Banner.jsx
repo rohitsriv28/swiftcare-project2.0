@@ -7,12 +7,12 @@ const Banner = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative overflow-hidden my-20 max-w-7xl mx-auto px-4">
-      {/* Background Elements */}
-      <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-500/10 rounded-full blur-xl"></div>
-      <div className="absolute -bottom-20 -right-10 w-60 h-60 bg-blue-300/10 rounded-full blur-xl"></div>
+    <div className="relative overflow-hidden my-12 max-w-7xl mx-auto px-4 md:px-6">
+      {/* Background Elements - Subtle Solid Circles */}
+      <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/5 rounded-full"></div>
+      <div className="absolute -bottom-20 -right-10 w-60 h-60 bg-white/5 rounded-full"></div>
 
-      <div className="relative flex flex-col md:flex-row bg-gradient-to-r from-primary to-primary/90 rounded-2xl shadow-xl overflow-hidden">
+      <div className="relative flex flex-col md:flex-row bg-primary rounded-xl overflow-hidden shadow-lg">
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full transform translate-x-16 -translate-y-16"></div>
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full transform -translate-x-12 translate-y-12"></div>
@@ -87,7 +87,7 @@ const Banner = () => {
         {/* Right Side - Image */}
         <div className="hidden md:block md:w-2/5 lg:w-1/2 relative">
           {/* Image highlight effect */}
-          <div className="absolute inset-0 bg-gradient-to-tl from-transparent via-transparent to-primary/20 z-10"></div>
+          <div className="absolute inset-0 bg-transparent z-10"></div>
 
           <img
             src={assets.appointment_img}

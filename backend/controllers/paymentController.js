@@ -1,4 +1,5 @@
 import axios from "axios";
+import crypto from "crypto";
 import razorpay from "razorpay";
 import appointmentModel from "../models/appointmentModel.js";
 import transactionModel from "../models/transactionModel.js";
@@ -232,24 +233,72 @@ const verifyRazorpayPayment = async (req, res) => {
   try {
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
       req.body;
-    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
 
-    if (orderInfo.status === "paid") {
-      await appointmentModel.findByIdAndUpdate(orderInfo.receipt, {
-        payment: true,
-        paymentMethod: "Razorpay",
-        paymentDate: new Date(),
-      });
-      res.json({
-        success: true,
-        message: "Payment verified successfully",
-      });
-    } else {
-      res.status(400).json({
+    // Validate required fields
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+      return res.status(400).json({
         success: false,
-        message: "Payment not verified/ Payment failed",
+        message: "Missing required payment verification fields",
       });
     }
+
+    // Step 1: Verify signature using HMAC-SHA256 (Razorpay official method)
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment verification failed: invalid signature",
+      });
+    }
+
+    // Step 2: Fetch order to get the appointment ID from the receipt
+    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
+
+    if (!orderInfo || !orderInfo.receipt) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment verification failed: order not found",
+      });
+    }
+
+    // Step 3: Validate order is actually paid (defense-in-depth)
+    if (orderInfo.status !== "paid") {
+      return res.status(400).json({
+        success: false,
+        message: "Payment not completed",
+      });
+    }
+
+    // Step 4: Guard against duplicate payment processing
+    const appointment = await appointmentModel.findById(orderInfo.receipt);
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
+    }
+    if (appointment.payment) {
+      return res.json({
+        success: true,
+        message: "Payment already verified",
+      });
+    }
+
+    // Step 5: Mark appointment as paid
+    await appointmentModel.findByIdAndUpdate(orderInfo.receipt, {
+      payment: true,
+      paymentMethod: "Razorpay",
+      paymentDate: new Date(),
+    });
+
+    res.json({
+      success: true,
+      message: "Payment verified successfully",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });

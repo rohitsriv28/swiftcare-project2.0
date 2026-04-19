@@ -5,13 +5,14 @@ import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
-    <div className="relative overflow-hidden rounded-xl shadow-lg bg-gradient-to-r from-primary to-primary/90">
-      <div className="absolute inset-0 bg-[url('path/to/subtle-pattern.png')] opacity-10"></div>
+    <div className="relative overflow-hidden rounded-xl bg-primary">
+      {/* Subtle Pattern Overlay - Solid Color Compatible */}
+      <div className="absolute inset-0 bg-[url('path/to/pattern.png')] opacity-5"></div>
 
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row px-6 md:px-10 lg:px-20 py-10 md:py-16">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row px-6 md:px-10 lg:px-20 py-8 md:py-12 relative z-10">
         {/* Left Side - Content */}
-        <div className="md:w-1/2 flex flex-col items-start justify-center gap-6 md:py-12 z-10">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl text-white font-bold leading-tight md:leading-tight lg:leading-tight tracking-tight">
+        <div className="md:w-1/2 flex flex-col items-start justify-center gap-6 md:py-4">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl text-white font-bold leading-tight tracking-tight font-fraunces">
             Book Appointment <br />
             <span className="relative">
               With Trusted

@@ -67,11 +67,10 @@ const Login = () => {
           <div className="flex border-b">
             <button
               onClick={() => setState("Login")}
-              className={`flex-1 py-4 font-medium text-center transition-all ${
-                state === "Login"
+              className={`flex-1 py-4 font-medium text-center transition-all ${state === "Login"
                   ? "text-primary border-b-2 border-primary"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               <span className="flex items-center justify-center gap-2">
                 <LogIn size={18} />
@@ -80,11 +79,10 @@ const Login = () => {
             </button>
             <button
               onClick={() => setState("Signup")}
-              className={`flex-1 py-4 font-medium text-center transition-all ${
-                state === "Signup"
+              className={`flex-1 py-4 font-medium text-center transition-all ${state === "Signup"
                   ? "text-primary border-b-2 border-primary"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               <span className="flex items-center justify-center gap-2">
                 <UserPlus size={18} />

@@ -301,11 +301,10 @@ const VerifyKhalti = () => {
                           paymentDetails.transaction_id || paymentDetails.pidx
                         )
                       }
-                      className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
-                        copied
+                      className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${copied
                           ? "bg-green-100 text-green-600"
                           : "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800"
-                      }`}
+                        }`}
                       title={copied ? "Copied!" : "Copy Transaction ID"}
                     >
                       {copied ? (
@@ -336,16 +335,13 @@ const VerifyKhalti = () => {
                 <span className="text-gray-600">Status:</span>
                 <div className="flex items-center gap-2">
                   <div
-                    className={`w-2 h-2 ${
-                      status === "success" ? "bg-green-500" : "bg-red-500"
-                    } rounded-full ${
-                      status === "success" ? "animate-pulse" : ""
-                    }`}
+                    className={`w-2 h-2 ${status === "success" ? "bg-green-500" : "bg-red-500"
+                      } rounded-full ${status === "success" ? "animate-pulse" : ""
+                      }`}
                   ></div>
                   <span
-                    className={`font-semibold ${
-                      status === "success" ? "text-green-600" : "text-red-600"
-                    }`}
+                    className={`font-semibold ${status === "success" ? "text-green-600" : "text-red-600"
+                      }`}
                   >
                     {status === "success" ? "Completed" : "Failed"}
                   </span>

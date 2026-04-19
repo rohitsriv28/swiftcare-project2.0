@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 const About = () => {
   return (
-    <div className="bg-gradient-to-b from-white to-blue-50">
+    <div className="bg-bg-light">
       {/* Hero Section */}
       <div className="container mx-auto px-4 pt-16 pb-24">
         <div className="flex flex-col items-center justify-center text-center mb-12">
@@ -119,10 +119,10 @@ const About = () => {
                 <div className="absolute -top-6 -left-6 w-32 h-32 bg-primary/10 rounded-full z-0"></div>
                 <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-primary/20 rounded-full z-0"></div>
                 <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl">
-                  <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center p-8">
+                  <div className="aspect-[4/3] bg-blue-100 flex items-center justify-center p-8">
                     <img src={assets.about_image} alt="" />
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                  <div className="absolute inset-0 bg-transparent"></div>
                   <div className="absolute bottom-6 left-6 text-white">
                     <h3 className="text-2xl font-bold">
                       Patient-Centered Care
@@ -154,7 +154,7 @@ const About = () => {
           {/* Card 1 */}
           <div className="group">
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-500 group-hover:-translate-y-3 group-hover:shadow-2xl h-full">
-              <div className="p-1 bg-gradient-to-r from-blue-400 to-primary"></div>
+              <div className="p-1 bg-primary"></div>
               <div className="p-8">
                 <div className="bg-primary/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6 group-hover:bg-primary transition-all duration-300">
                   <Clock
@@ -176,7 +176,7 @@ const About = () => {
           {/* Card 2 */}
           <div className="group">
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-500 group-hover:-translate-y-3 group-hover:shadow-2xl h-full">
-              <div className="p-1 bg-gradient-to-r from-blue-400 to-primary"></div>
+              <div className="p-1 bg-primary"></div>
               <div className="p-8">
                 <div className="bg-primary/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6 group-hover:bg-primary transition-all duration-300">
                   <Users
@@ -198,7 +198,7 @@ const About = () => {
           {/* Card 3 */}
           <div className="group">
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-500 group-hover:-translate-y-3 group-hover:shadow-2xl h-full">
-              <div className="p-1 bg-gradient-to-r from-blue-400 to-primary"></div>
+              <div className="p-1 bg-primary"></div>
               <div className="p-8">
                 <div className="bg-primary/10 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6 group-hover:bg-primary transition-all duration-300">
                   <Heart

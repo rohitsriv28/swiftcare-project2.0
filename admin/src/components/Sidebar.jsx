@@ -12,23 +12,24 @@ const Sidebar = () => {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center gap-4 py-4 px-4 md:px-6 transition-all duration-200 rounded-lg mx-2 mb-1 
-        ${
-          isActive
-            ? "bg-primary/10 text-primary font-medium border-l-4 border-primary"
-            : "text-gray-600 hover:bg-gray-100"
+        `flex items-center gap-3 py-3 px-4 md:px-6 transition-colors duration-200 border-r-0 md:rounded-r-lg mr-4 mb-1
+        ${isActive
+          ? "bg-[#F2F3FF] text-primary border-l-4 border-primary font-medium"
+          : "border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4"
         }`
       }
     >
-      {icon}
-      <span className="hidden md:block text-sm">{label}</span>
+      <div className="flex items-center gap-3">
+        {React.cloneElement(icon, { size: 20 })}
+        <span className="hidden md:block text-sm tracking-wide">{label}</span>
+      </div>
     </NavLink>
   );
 
   return (
-    <div className="min-h-screen bg-white border-r border-gray-200 shadow-sm pt-4">
+    <div className="min-h-screen bg-white border-r border-gray-200 pt-6">
       {aToken && (
-        <div className="space-y-1">
+        <div className="space-y-1 pr-2">
           <NavItem
             to="/admin/dashboard"
             icon={<Home size={20} />}

@@ -17,11 +17,12 @@ import {
   verifyRazorpayPayment,
 } from "../controllers/paymentController.js";
 import { searchDoctors } from "../controllers/doctorController.js";
+import { authLimiter } from "../middleware/rateLimiter.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/register", registerUser);
-userRouter.post("/login", userLogin);
+userRouter.post("/register", authLimiter, registerUser);
+userRouter.post("/login", authLimiter, userLogin);
 userRouter.get("/get-profile", authUser, getProfile);
 userRouter.post(
   "/update-profile",

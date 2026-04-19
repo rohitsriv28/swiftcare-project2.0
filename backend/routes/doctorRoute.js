@@ -11,13 +11,14 @@ import {
 } from "../controllers/doctorController.js";
 import authDoctor from "../middleware/authDoctor.js";
 import multer from "multer";
+import { authLimiter } from "../middleware/rateLimiter.js";
 
 const doctorRouter = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 doctorRouter.get("/list", doctorList);
-doctorRouter.post("/login", doctorLogin);
+doctorRouter.post("/login", authLimiter, doctorLogin);
 doctorRouter.get("/doctor-appointments", authDoctor, doctorAppointments);
 doctorRouter.post(
   "/complete-appointment",

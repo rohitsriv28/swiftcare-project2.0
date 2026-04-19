@@ -13,10 +13,11 @@ import {
   changeAvailability,
   searchDoctors,
 } from "../controllers/doctorController.js";
+import { authLimiter } from "../middleware/rateLimiter.js";
 
 const adminRouter = express.Router();
 
-adminRouter.post("/login", adminLogin);
+adminRouter.post("/login", authLimiter, adminLogin);
 adminRouter.post("/add-doctor", authAdmin, upload.single("image"), addDoctor);
 adminRouter.post("/all-doctors", authAdmin, allDoctors);
 adminRouter.post("/search-doctors", authAdmin, searchDoctors);

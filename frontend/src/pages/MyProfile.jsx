@@ -88,7 +88,7 @@ const MyProfile = () => {
   return (
     <div className="w-full min-h-screen pb-12">
       {/* Header with gradient background */}
-      <div className="w-full bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] h-56 relative">
+      <div className="w-full bg-primary h-56 relative">
         <div className="absolute bottom-0 left-0 w-full transform translate-y-1/2">
           <div className="container mx-auto px-4 flex flex-col md:flex-row items-center md:items-end gap-6">
             {/* Profile Image */}

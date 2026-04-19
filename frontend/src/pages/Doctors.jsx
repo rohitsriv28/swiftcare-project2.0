@@ -6,26 +6,21 @@ import {
   Circle,
   ChevronRight,
   MapPin,
-  Star,
   Calendar,
   CheckCircle2,
   Filter,
   ChevronDown,
   ChevronUp,
+  Stethoscope,
+  Baby,
+  ShieldPlus,
+  Brain,
+  Heart,
+  Bone,
+  Eye,
+  Ear,
+  Smile,
 } from "lucide-react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUserDoctor,
-  faPersonPregnant,
-  faAllergies,
-  faBaby,
-  faBrain,
-  faHeartPulse,
-  faBone,
-  faEye,
-  faEarListen,
-  faTooth,
-} from "@fortawesome/free-solid-svg-icons";
 
 const Doctors = () => {
   const { speciality } = useParams();
@@ -35,17 +30,17 @@ const Doctors = () => {
   const navigate = useNavigate();
 
   const specialties = [
-    { name: "General Physician", icon: faUserDoctor },
-    { name: "Gynecologist", icon: faPersonPregnant },
-    { name: "Dermatologist", icon: faAllergies },
-    { name: "Pediatrician", icon: faBaby },
-    { name: "Neurologist", icon: faBrain },
-    { name: "Cardiologist", icon: faHeartPulse },
-    { name: "Orthopedic", icon: faBone },
-    { name: "Ophthalmologist", icon: faEye },
-    { name: "ENT Specialist", icon: faEarListen },
-    { name: "Psychiatrist", icon: faBrain },
-    { name: "Dentist", icon: faTooth },
+    { name: "General Physician", icon: Stethoscope },
+    { name: "Gynecologist", icon: Baby },
+    { name: "Dermatologist", icon: ShieldPlus },
+    { name: "Pediatrician", icon: Baby },
+    { name: "Neurologist", icon: Brain },
+    { name: "Cardiologist", icon: Heart },
+    { name: "Orthopedic", icon: Bone },
+    { name: "Ophthalmologist", icon: Eye },
+    { name: "ENT Specialist", icon: Ear },
+    { name: "Psychiatrist", icon: Brain },
+    { name: "Dentist", icon: Smile },
   ];
 
   const applyFilter = () => {
@@ -115,9 +110,8 @@ const Doctors = () => {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Filter Section - Collapsible on Mobile */}
         <div
-          className={`w-full lg:w-1/4 ${
-            showFilter ? "block" : "hidden"
-          } lg:block transition-all duration-300`}
+          className={`w-full lg:w-1/4 ${showFilter ? "block" : "hidden"
+            } lg:block transition-all duration-300`}
         >
           <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
             <div className="bg-primary text-white p-3 flex items-center gap-2">
@@ -137,16 +131,15 @@ const Doctors = () => {
                   }}
                   className={`
                     flex items-center justify-between p-2 rounded-md cursor-pointer text-sm transition-all duration-200
-                    ${
-                      speciality === spec.name
-                        ? "bg-primary text-white font-medium"
-                        : "hover:bg-gray-100"
+                    ${speciality === spec.name
+                      ? "bg-primary text-white font-medium"
+                      : "hover:bg-gray-100"
                     }
                   `}
                 >
                   <div className="flex items-center gap-2">
-                    <FontAwesomeIcon
-                      icon={spec.icon}
+                    <spec.icon
+                      size={16}
                       className={
                         speciality === spec.name ? "text-white" : "text-primary"
                       }
@@ -172,11 +165,10 @@ const Doctors = () => {
                     navigate(`/appointment/${doctor._id}`)
                   }
                   className={`bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 flex
-      ${
-        doctor.availability
-          ? "hover:shadow-md cursor-pointer transition-all duration-200 hover:bg-gray-50"
-          : "opacity-75 cursor-not-allowed"
-      }`}
+      ${doctor.availability
+                      ? "hover:shadow-md cursor-pointer transition-all duration-200 hover:bg-gray-50"
+                      : "opacity-75 cursor-not-allowed"
+                    }`}
                 >
                   {/* Doctor Image */}
                   <div className="relative w-20 sm:w-28 h-full overflow-hidden flex-shrink-0 min-h-[100px]">
@@ -185,9 +177,8 @@ const Doctors = () => {
                         <img
                           src={doctor.image}
                           alt={doctor.name}
-                          className={`w-full h-full object-cover ${
-                            !doctor.availability ? "grayscale" : ""
-                          }`}
+                          className={`w-full h-full object-cover ${!doctor.availability ? "grayscale" : ""
+                            }`}
                         />
                       ) : (
                         <UserCheck

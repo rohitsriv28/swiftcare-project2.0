@@ -145,35 +145,51 @@ const addDoctor = async (req, res) => {
 };
 
 //API for admin login
+// Dummy hash used to prevent timing-based email enumeration attacks.
+// When email doesn't match, we still run bcrypt.compare() against this dummy
+// so the response time is the same regardless of whether the email exists.
+const DUMMY_HASH = "$2b$10$dummyhashfortimingatttackpreventionxx";
+
 const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (
-      email === process.env.ADMIN_EMAIL &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
-      const token = jwt.sign(
-        { email }, // Store email as payload
-        process.env.JWT_SECRET,
-        { expiresIn: "12h" }
-      );
 
-      return res.status(200).json({
-        success: true,
-        message: "Admin logged in successfully",
-        token: token,
-      });
-    } else {
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and password are required" });
+    }
+
+    // Always run bcrypt.compare to prevent timing-based email enumeration
+    const isEmailValid = email === process.env.ADMIN_EMAIL;
+    const hashToCompare = isEmailValid
+      ? process.env.ADMIN_PASSWORD_HASH
+      : DUMMY_HASH;
+
+    const isPasswordValid = await bcrypt.compare(password, hashToCompare);
+
+    if (!isEmailValid || !isPasswordValid) {
       return res
         .status(400)
         .json({ success: false, message: "Invalid email or password" });
     }
+
+    const token = jwt.sign(
+      { email, role: "admin" },
+      process.env.JWT_SECRET,
+      { expiresIn: "12h" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin logged in successfully",
+      token: token,
+    });
   } catch (error) {
     console.log("Error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
-      // "Internal server error"
+      message: "Internal server error",
     });
   }
 };

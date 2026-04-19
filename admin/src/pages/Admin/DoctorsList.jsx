@@ -2,15 +2,14 @@ import React, { useContext, useEffect, useState } from "react";
 import { AdminContext } from "../../context/AdminContext";
 import { toast } from "react-toastify";
 import Switch from "react-switch";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faUser,
-  faClock,
-  faIndianRupeeSign,
-  faAward,
-  faArrowsRotate,
-  faArrowsUpDown,
-} from "@fortawesome/free-solid-svg-icons";
+  User,
+  Clock,
+  IndianRupee,
+  Award,
+  RefreshCw,
+  ArrowUpDown,
+} from "lucide-react";
 import { AppContext } from "../../context/AppContext";
 
 const DoctorsList = () => {
@@ -78,7 +77,7 @@ const DoctorsList = () => {
               "↓"
             )
           ) : (
-            <FontAwesomeIcon icon={faArrowsUpDown} className="h-3 w-3 text-gray-400" />
+            <ArrowUpDown className="h-3 w-3 text-gray-400" />
           )}
         </span>
       </div>
@@ -93,21 +92,19 @@ const DoctorsList = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setViewMode("grid")}
-              className={`px-4 py-2 rounded-md transition duration-150 ${
-                viewMode === "grid"
+              className={`px-4 py-2 rounded-md transition duration-150 ${viewMode === "grid"
                   ? "bg-indigo-600 text-white shadow-md"
                   : "bg-gray-100 hover:bg-gray-200"
-              }`}
+                }`}
             >
               Grid
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`px-4 py-2 rounded-md transition duration-150 ${
-                viewMode === "list"
+              className={`px-4 py-2 rounded-md transition duration-150 ${viewMode === "list"
                   ? "bg-indigo-600 text-white shadow-md"
                   : "bg-gray-100 hover:bg-gray-200"
-              }`}
+                }`}
             >
               List
             </button>
@@ -119,8 +116,7 @@ const DoctorsList = () => {
           className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 transition duration-150 flex items-center"
           disabled={isLoading}
         >
-          <FontAwesomeIcon
-            icon={faArrowsRotate}
+          <RefreshCw
             className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
           />
           {isLoading ? "Loading..." : "Refresh"}
@@ -133,7 +129,7 @@ const DoctorsList = () => {
         </div>
       ) : sortedDoctors.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <FontAwesomeIcon icon={faUser} className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+          <User className="h-12 w-12 text-gray-300 mx-auto mb-2" />
           <h3 className="text-lg font-medium">No doctors found</h3>
         </div>
       ) : viewMode === "grid" ? (
@@ -155,11 +151,10 @@ const DoctorsList = () => {
                   }}
                 />
                 <span
-                  className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${
-                    doctor.availability
+                  className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${doctor.availability
                       ? "bg-green-100 text-green-800"
                       : "bg-red-100 text-red-800"
-                  }`}
+                    }`}
                 >
                   {doctor.availability ? "Available" : "Unavailable"}
                 </span>
@@ -172,17 +167,17 @@ const DoctorsList = () => {
 
               <div className="mt-3">
                 <div className="flex items-center mb-1">
-                  <FontAwesomeIcon icon={faAward} className="h-4 w-4 mr-2" />
+                  <Award className="h-4 w-4 mr-2" />
                   <span className="text-sm">{doctor.degree}</span>
                 </div>
                 <div className="flex items-center mb-1">
-                  <FontAwesomeIcon icon={faClock} className="h-4 w-4 mr-2" />
+                  <Clock className="h-4 w-4 mr-2" />
                   <span className="text-sm">
                     {doctor.experience} years experience
                   </span>
                 </div>
                 <div className="flex items-center mb-3">
-                  <FontAwesomeIcon icon={faIndianRupeeSign} className="h-4 w-4 mr-2" />
+                  <IndianRupee className="h-4 w-4 mr-2" />
                   <span className="text-sm">
                     Fee: {currencySymbol}
                     {doctor.fee}
@@ -225,9 +220,8 @@ const DoctorsList = () => {
                 {sortedDoctors.map((doctor, index) => (
                   <tr
                     key={doctor._id}
-                    className={`hover:bg-gray-50 transition duration-150 ${
-                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    }`}
+                    className={`hover:bg-gray-50 transition duration-150 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      }`}
                   >
                     <td className="px-4 py-4">
                       <div className="flex items-center">
@@ -260,13 +254,13 @@ const DoctorsList = () => {
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-700">
                       <div className="flex items-center">
-                        <FontAwesomeIcon icon={faClock} className="h-4 w-4 mr-2 text-gray-400" />
+                        <Clock className="h-4 w-4 mr-2 text-gray-400" />
                         {doctor.experience} years
                       </div>
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-700">
                       <div className="flex items-center">
-                        <FontAwesomeIcon icon={faIndianRupeeSign} className="h-4 w-4 mr-1 text-gray-400" />
+                        <IndianRupee className="h-4 w-4 mr-1 text-gray-400" />
                         <span className="font-medium">{doctor.fee}</span>
                       </div>
                     </td>
@@ -283,11 +277,10 @@ const DoctorsList = () => {
                           uncheckedIcon={false}
                         />
                         <span
-                          className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${
-                            doctor.availability
+                          className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${doctor.availability
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
-                          }`}
+                            }`}
                         >
                           {doctor.availability ? "Available" : "Unavailable"}
                         </span>

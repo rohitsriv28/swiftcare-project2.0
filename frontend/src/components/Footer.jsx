@@ -1,6 +1,3 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXTwitter } from "@fortawesome/free-brands-svg-icons";
 import {
   Facebook,
   Instagram,
@@ -11,6 +8,7 @@ import {
   Info,
   FileText,
   Heart,
+  Twitter,
 } from "lucide-react";
 
 const Footer = () => {
@@ -48,7 +46,7 @@ const Footer = () => {
                 aria-label="Twitter"
                 className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm hover:bg-primary hover:text-white transition-all"
               >
-                <FontAwesomeIcon icon={faXTwitter} size="sm" />
+                <Twitter size={18} />
               </a>
               <a
                 href="#"

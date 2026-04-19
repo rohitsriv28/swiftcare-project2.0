@@ -10,7 +10,6 @@ import {
   MapPin,
   Award,
   CreditCard,
-  DollarSign,
   XCircle,
   CheckCircle,
   Loader2,
@@ -280,11 +279,10 @@ const MyAppointments = () => {
             {upcoming.map((item, index) => (
               <div
                 key={index}
-                className={`p-4 ${
-                  index !== upcoming.length - 1
+                className={`p-4 ${index !== upcoming.length - 1
                     ? "border-b border-gray-100"
                     : ""
-                }`}
+                  }`}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
                   {/* Doctor Image */}
@@ -326,8 +324,6 @@ const MyAppointments = () => {
                         <Clock size={14} />
                         <span>{item.slotTime}</span>
                       </div>
-
-                      
                     </div>
 
                     {/* Actions */}
@@ -379,11 +375,10 @@ const MyAppointments = () => {
             {completed.map((item, index) => (
               <div
                 key={index}
-                className={`p-4 ${
-                  index !== completed.length - 1
+                className={`p-4 ${index !== completed.length - 1
                     ? "border-b border-gray-100"
                     : ""
-                }`}
+                  }`}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
                   {/* Doctor Image */}
@@ -451,7 +446,7 @@ const MyAppointments = () => {
 
       {/* Cancelled Appointments */}
       {cancelled.length > 0 && (
-        <div>
+        <div className="mb-10">
           <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
             <XCircle size={18} className="text-red-500" />
             Cancelled Appointments
@@ -460,11 +455,10 @@ const MyAppointments = () => {
             {cancelled.map((item, index) => (
               <div
                 key={index}
-                className={`p-4 ${
-                  index !== cancelled.length - 1
+                className={`p-4 ${index !== cancelled.length - 1
                     ? "border-b border-gray-100"
                     : ""
-                }`}
+                  }`}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
                   {/* Doctor Image */}

@@ -195,7 +195,7 @@ const DoctorProfile = () => {
     <div className="max-w-4xl mx-auto p-4 md:p-6">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 md:p-8 text-white">
+        <div className="bg-primary p-6 md:p-8 text-white">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative group">
               <div className="w-36 h-36 rounded-full border-4 border-white shadow-lg overflow-hidden">
@@ -244,11 +244,10 @@ const DoctorProfile = () => {
               <div className="mt-3 flex items-center gap-3 justify-center md:justify-start">
                 <span className="bg-blue-500 bg-opacity-30 px-3 py-1 rounded-full text-sm font-medium text-white flex items-center gap-1">
                   <span
-                    className={`h-2 w-2 rounded-full ${
-                      doctorProfile.availability
+                    className={`h-2 w-2 rounded-full ${doctorProfile.availability
                         ? "bg-green-400"
                         : "bg-gray-300"
-                    }`}
+                      }`}
                   ></span>
                   {doctorProfile.availability ? "Available" : "Unavailable"}
                 </span>
@@ -321,11 +320,10 @@ const DoctorProfile = () => {
                     />
                   )}
                   <span
-                    className={`text-sm ${
-                      doctorProfile.availability
+                    className={`text-sm ${doctorProfile.availability
                         ? "text-green-600"
                         : "text-gray-600"
-                    }`}
+                      }`}
                   >
                     {doctorProfile.availability ? "Available" : "Unavailable"}
                   </span>
