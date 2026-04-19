@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import Fuse from "fuse.js";
+import { pruneDoctorSlots } from "../utils/slotScheduler.js";
 
 const changeAvailability = async (req, res) => {
   try {
@@ -27,6 +28,12 @@ const changeAvailability = async (req, res) => {
 const doctorList = async (req, res) => {
   try {
     const doctors = await doctorModel.find({}).select(["-password", "-email"]);
+    
+    // Pruning natively preventing history bloat 
+    for (let doc of doctors) {
+      await pruneDoctorSlots(doc);
+    }
+
     res.json({ success: true, doctors });
   } catch (error) {
     console.log(error);
@@ -135,9 +142,20 @@ const markAppointmentCancelled = async (req, res) => {
     const appointmentData = await appointmentModel.findById(appointmentId);
 
     if (appointmentData && appointmentData.docId.toString() === docId) {
+      if (appointmentData.isCancelled) {
+        return res.json({ success: false, message: "Appointment is already cancelled" });
+      }
+
       await appointmentModel.findByIdAndUpdate(appointmentId, {
         isCancelled: true,
       });
+
+      // Free the slot organically
+      const { slotDate, slotTime } = appointmentData;
+      await doctorModel.findByIdAndUpdate(docId, {
+        $pull: { [`slots_booked.${slotDate}`]: slotTime },
+      });
+
       res.json({
         success: true,
         message: "Appointment marked as cancelled",
@@ -233,7 +251,12 @@ const doctorDashboardData = async (req, res) => {
 const doctorProfile = async (req, res) => {
   try {
     const { docId } = req.body;
-    const profileData = await doctorModel.findById(docId).select("-password");
+    let profileData = await doctorModel.findById(docId).select("-password");
+
+    if (profileData) {
+      await pruneDoctorSlots(profileData);
+    }
+
     res.json({
       success: true,
       profileData,
@@ -258,9 +281,17 @@ const updateDoctorProfile = async (req, res) => {
     let imageUrl = null;
 
     if (req.file) {
-      imageUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString(
-        "base64"
-      )}`;
+      const imageUpload = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "image", folder: "doctors" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+      imageUrl = imageUpload.secure_url;
     }
 
     await doctorModel.findByIdAndUpdate(docId, {

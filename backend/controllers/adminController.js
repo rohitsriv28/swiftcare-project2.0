@@ -109,10 +109,16 @@ const addDoctor = async (req, res) => {
       });
     }
 
-    // uploading image to cloudinary
-    const uploadedImage = await cloudinary.uploader.upload(imageFile.path, {
-      resource_type: "image",
-      folder: "doctors",
+    // uploading image to cloudinary via stream mapped to buffer natively
+    const uploadedImage = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { resource_type: "image", folder: "doctors" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      stream.end(imageFile.buffer);
     });
 
     const imageUrl = uploadedImage.secure_url;
@@ -251,18 +257,20 @@ const appointmentCancellationByAdmin = async (req, res) => {
   try {
     const { appointmentId } = req.body;
     const appointmentData = await appointmentModel.findById(appointmentId);
+    
+    if (appointmentData.isCancelled) {
+      return res.json({ success: false, message: "Appointment already cancelled" });
+    }
+
     await appointmentModel.findByIdAndUpdate(appointmentId, {
       isCancelled: true,
     });
 
-    // Removing slots from DocData
+    // Remove slots efficiently and atomically using pull
     const { docId, slotDate, slotTime } = appointmentData;
-    const docData = await doctorModel.findById(docId);
-    let slots_booked = docData.slots_booked;
-    slots_booked[slotDate] = slots_booked[slotDate].filter(
-      (e) => e !== slotTime
-    );
-    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+    await doctorModel.findByIdAndUpdate(docId, {
+      $pull: { [`slots_booked.${slotDate}`]: slotTime },
+    });
     res.json({ success: true, message: "Appointment cancelled successfully" });
   } catch (error) {
     console.log(error);
@@ -273,99 +281,89 @@ const appointmentCancellationByAdmin = async (req, res) => {
 //API for Admin Dashboard Data
 const adminDashboarddata = async (req, res) => {
   try {
-    const doctors = await doctorModel.find({});
-    const appointments = await appointmentModel.find({});
-    const users = await userModel.find({});
+    // 1. Core Counts directly from DB
+    const totalDoctors = await doctorModel.countDocuments();
+    const activeDoctors = await doctorModel.countDocuments({ availability: true });
+    const totalAppointments = await appointmentModel.countDocuments();
+    const totalPatients = await userModel.countDocuments();
+    const pendingAppointments = await appointmentModel.countDocuments({ isCancelled: false });
+    const paidAppointments = await appointmentModel.countDocuments({ isCancelled: false, payment: true });
 
-    // Calculate active doctors
-    const activeDoctors = doctors.filter((doc) => doc.availability).length;
-
-    // Calculate today's date string in the same format as slotDate
+    // 2. Today's Appointments
     const today = new Date();
-    const todayDateString = `${today.getDate()}_${
-      today.getMonth() + 1
-    }_${today.getFullYear()}`;
-
-    // Filter today's appointments
-    const todayAppointments = appointments.filter(
-      (app) => app.slotDate === todayDateString && !app.isCancelled
-    );
-
-    // Calculate total revenue from completed and PAID appointments only
-    const totalRevenue = appointments.reduce(
-      (sum, app) => sum + (app.isCancelled || !app.payment ? 0 : app.amount),
-      0
-    );
-
-    // Get last 10 appointments sorted by date
-    const latestAppointments = appointments
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .slice(0, 10);
-
-    // Get top 5 doctors by number of appointments
-    const doctorAppointments = {};
-    appointments.forEach((app) => {
-      if (!app.isCancelled && app.payment) {
-        // Only count paid appointments
-        const docId = app.docId.toString();
-        doctorAppointments[docId] = (doctorAppointments[docId] || 0) + 1;
-      }
+    const todayDateString = `${today.getDate()}_${today.getMonth() + 1}_${today.getFullYear()}`;
+    const todayAppointments = await appointmentModel.countDocuments({
+      slotDate: todayDateString,
+      isCancelled: false,
     });
 
-    const topDoctors = Object.entries(doctorAppointments)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([docId, count]) => {
-        const doctor = doctors.find((d) => d._id.toString() === docId);
-        return {
-          id: docId,
-          name: doctor?.name || "Unknown",
-          image: doctor?.image || "",
-          speciality: doctor?.speciality || "",
-          appointments: count,
-          revenue: appointments
-            .filter(
-              (a) => a.docId.toString() === docId && !a.isCancelled && a.payment
-            ) // Only count paid appointments
-            .reduce((sum, a) => sum + a.amount, 0),
-        };
-      });
+    // 3. Total Revenue via Aggregation
+    const revenueAgg = await appointmentModel.aggregate([
+      { $match: { isCancelled: false, payment: true } },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]);
+    const totalRevenue = revenueAgg[0]?.total || 0;
 
-    // Get appointments by specialty
-    const specialtyStats = {};
-    appointments.forEach((app) => {
-      if (!app.isCancelled && app.payment) {
-        // Only count paid appointments
-        const specialty = app.docData?.speciality || "Unknown";
-        specialtyStats[specialty] = specialtyStats[specialty] || {
-          count: 0,
-          revenue: 0,
-        };
-        specialtyStats[specialty].count++;
-        specialtyStats[specialty].revenue += app.amount;
-      }
+    // 4. Latest Appointments
+    const latestAppointments = await appointmentModel
+      .find({})
+      .sort({ date: -1 })
+      .limit(10);
+
+    // 5. Top 5 Doctors via Aggregation
+    const topDoctorsAgg = await appointmentModel.aggregate([
+      { $match: { isCancelled: false, payment: true } },
+      { $group: { _id: "$docId", appointments: { $sum: 1 }, revenue: { $sum: "$amount" } } },
+      { $sort: { appointments: -1 } },
+      { $limit: 5 }
+    ]);
+    
+    // Fetch doctor metadata for top doctors only
+    const doctorIds = topDoctorsAgg.map((agg) => agg._id);
+    const topDocsMetadata = await doctorModel.find({ _id: { $in: doctorIds } });
+    
+    const topDoctors = topDoctorsAgg.map((agg) => {
+      const doc = topDocsMetadata.find((d) => d._id.toString() === agg._id.toString());
+      return {
+        id: agg._id,
+        name: doc?.name || "Unknown",
+        image: doc?.image || "",
+        speciality: doc?.speciality || "",
+        appointments: agg.appointments,
+        revenue: agg.revenue
+      };
     });
+
+    // 6. Appointments by Specialty
+    const specialtyAgg = await appointmentModel.aggregate([
+      { $match: { isCancelled: false, payment: true } },
+      { $group: { _id: "$docData.speciality", count: { $sum: 1 }, revenue: { $sum: "$amount" } } }
+    ]);
+    const specialtyStats = specialtyAgg.map(agg => ({
+      name: agg._id || "Unknown",
+      count: agg.count,
+      revenue: agg.revenue
+    }));
+
+    // 7. Last 30 Days mapping (Fetch only recent DB records rather than whole collection)
+    const thirtyDaysAgo = Date.now() - 31 * 24 * 60 * 60 * 1000; // 31 days buffer
+    const recentAppointments = await appointmentModel.find({ date: { $gte: thirtyDaysAgo } });
 
     const dashboardData = {
       stats: {
-        totalDoctors: doctors.length,
+        totalDoctors,
         activeDoctors,
-        totalAppointments: appointments.length,
-        pendingAppointments: appointments.filter((a) => !a.isCancelled).length,
-        paidAppointments: appointments.filter(
-          (a) => !a.isCancelled && a.payment
-        ).length,
-        totalPatients: users.length,
-        todayAppointments: todayAppointments.length,
+        totalAppointments,
+        pendingAppointments,
+        paidAppointments,
+        totalPatients,
+        todayAppointments,
         totalRevenue,
       },
       latestAppointments,
       topDoctors,
-      specialtyStats: Object.entries(specialtyStats).map(([name, stats]) => ({
-        name,
-        ...stats,
-      })),
-      appointmentsByDay: getLast30DaysAppointments(appointments),
+      specialtyStats,
+      appointmentsByDay: getLast30DaysAppointments(recentAppointments),
     };
 
     res.json({ success: true, dashboardData });

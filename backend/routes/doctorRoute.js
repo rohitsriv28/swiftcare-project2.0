@@ -12,26 +12,36 @@ import {
 import authDoctor from "../middleware/authDoctor.js";
 import multer from "multer";
 import { authLimiter } from "../middleware/rateLimiter.js";
+import { validateRequests } from "../validators/validateRequests.js";
+import { 
+  doctorLoginValidation, 
+  updateDoctorProfileValidation, 
+  doctorAppointmentValidation 
+} from "../validators/doctorValidator.js";
 
 const doctorRouter = express.Router();
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024 } }); // Centralizing memory limits on doctor route exclusively
 
 doctorRouter.get("/list", doctorList);
-doctorRouter.post("/login", authLimiter, doctorLogin);
+doctorRouter.post("/login", authLimiter, doctorLoginValidation, validateRequests, doctorLogin);
 doctorRouter.get("/doctor-appointments", authDoctor, doctorAppointments);
 doctorRouter.post(
   "/complete-appointment",
   authDoctor,
+  doctorAppointmentValidation,
+  validateRequests,
   markAppointmentCompleted
 );
-doctorRouter.post("/cancel-appointment", authDoctor, markAppointmentCancelled);
+doctorRouter.post("/cancel-appointment", authDoctor, doctorAppointmentValidation, validateRequests, markAppointmentCancelled);
 doctorRouter.get("/dashboard", authDoctor, doctorDashboardData);
-doctorRouter.get("/profile", authDoctor, doctorProfile);
+doctorRouter.post("/profile", authDoctor, doctorProfile);
 doctorRouter.post(
   "/update-profile",
   authDoctor,
   upload.single("image"),
+  updateDoctorProfileValidation,
+  validateRequests,
   updateDoctorProfile
 );
 
