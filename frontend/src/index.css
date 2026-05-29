@@ -1,25 +1,61 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap");
 
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1f2a44;
-  --color-secondary: #2bb0a8;
-  --color-accent: #6fa8ff;
-  --color-bg-light: #f7f9fc;
-  --color-bg-dark: #0f172a;
-  --color-surface-light: #ffffff;
-  --color-surface-dark: #1e293b;
-  --color-text-main: #0b1324;
-  --color-text-inverted: #e5e7eb;
-  --color-text-muted: #64748b;
-  --color-success: #16a34a;
-  --color-warning: #f59e0b;
-  --color-error: #dc2626;
+  /* Primary — deep teal-navy */
+  --color-primary: #1a6e80;
+  --color-primary-dark: #0c4a52;
+  --color-primary-light: #e6f2f4;
+  --color-primary-muted: #7dbfca;
+
+  /* Secondary — slate indigo (analytics / AI depth) */
+  --color-secondary: #3045a0;
+  --color-secondary-dark: #1e2a5e;
+  --color-secondary-light: #eef0f8;
+
+  /* Accent — amber-gold (AI features, highlights, recommendations) */
+  --color-accent: #e69b0f;
+  --color-accent-dark: #b07208;
+  --color-accent-light: #fef6e4;
+
+  /* Semantic */
+  --color-success: #1b8c5e;
+  --color-success-light: #e6f4ee;
+  --color-warning: #d97706;
+  --color-warning-light: #fef6e4;
+  --color-error: #c93030;
+  --color-error-light: #fef0f0;
+
+  /* Surface tiers */
+  --color-surface-page: #f4f7f8;
+  --color-surface-card: #ffffff;
+  --color-surface-input: #eff4f5;
+
+  /* Navigation */
+  --color-nav-bg: #0c4a52;
+
+  /* Text */
+  --color-text-main: #0b1f24;
+  --color-text-muted: #5f6b7a;
+  --color-text-inverted: #e6f2f4;
+
+  /* Border */
+  --color-border: #d1dce0;
+  --color-border-light: #e6f2f4;
 }
 
 * {
-  font-family: Fraunces;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Fraunces", serif;
 }
 
 .active hr {
