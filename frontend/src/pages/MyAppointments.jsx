@@ -27,12 +27,12 @@ const MyAppointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
   const [processingPaymentId, setProcessingPaymentId] = useState(null);
-  
+
   // Cursor pagination state
   const [appointmentsCursor, setAppointmentsCursor] = useState(null);
   const [hasMoreAppointments, setHasMoreAppointments] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  
+
   // Review state
   const [activeReviewId, setActiveReviewId] = useState(null);
   const [reviewRating, setReviewRating] = useState(0);
@@ -68,9 +68,12 @@ const MyAppointments = () => {
   const getUserAppointments = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(backendUrl + "/api/user/appointments?limit=10", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get(
+        backendUrl + "/api/user/appointments?limit=10",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (data.success) {
         setAppointments(data.appointments);
         if (data.pagination) {
@@ -92,10 +95,10 @@ const MyAppointments = () => {
     try {
       const { data } = await axios.get(
         `${backendUrl}/api/user/appointments?limit=10&cursor=${appointmentsCursor}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (data.success) {
-        setAppointments(prev => [...prev, ...data.appointments]);
+        setAppointments((prev) => [...prev, ...data.appointments]);
         if (data.pagination) {
           setAppointmentsCursor(data.pagination.nextCursor);
           setHasMoreAppointments(data.pagination.hasNextPage);
@@ -114,7 +117,7 @@ const MyAppointments = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/cancel-appointment",
         { appointmentId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (data.success) {
         toast.success(data.message);
@@ -136,7 +139,7 @@ const MyAppointments = () => {
       toast.error("Please select a rating");
       return;
     }
-    
+
     setSubmittingReview(true);
     try {
       const { data } = await axios.post(
@@ -146,15 +149,15 @@ const MyAppointments = () => {
           rating: reviewRating,
           comment: reviewComment,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (data.success) {
         toast.success(data.message);
         // Optimistically update the UI
         setAppointments((prev) =>
           prev.map((app) =>
-            app._id === appointmentId ? { ...app, hasReviewed: true } : app
-          )
+            app._id === appointmentId ? { ...app, hasReviewed: true } : app,
+          ),
         );
         setActiveReviewId(null);
         setReviewRating(0);
@@ -186,7 +189,7 @@ const MyAppointments = () => {
           const { data } = await axios.post(
             backendUrl + "/api/user/verify-razorpay",
             response,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${token}` } },
           );
           if (data.success) {
             toast.success("Payment successful!");
@@ -211,7 +214,7 @@ const MyAppointments = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/pay-with-razorpay",
         { appointmentId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (data.success) {
         console.log(data.order);
@@ -247,15 +250,15 @@ const MyAppointments = () => {
   // Group appointments by status
   const getAppointmentsByStatus = () => {
     const upcoming = appointments.filter(
-      (appointment) => !appointment.isCancelled && !appointment.isComplete
+      (appointment) => !appointment.isCancelled && !appointment.isComplete,
     );
 
     const completed = appointments.filter(
-      (appointment) => !appointment.isCancelled && appointment.isComplete
+      (appointment) => !appointment.isCancelled && appointment.isComplete,
     );
 
     const cancelled = appointments.filter(
-      (appointment) => appointment.isCancelled
+      (appointment) => appointment.isCancelled,
     );
 
     return { upcoming, completed, cancelled };
@@ -358,10 +361,11 @@ const MyAppointments = () => {
             {upcoming.map((item, index) => (
               <div
                 key={index}
-                className={`p-4 ${index !== upcoming.length - 1
+                className={`p-4 ${
+                  index !== upcoming.length - 1
                     ? "border-b border-gray-100"
                     : ""
-                  }`}
+                }`}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
                   {/* Doctor Image */}
@@ -454,10 +458,11 @@ const MyAppointments = () => {
             {completed.map((item, index) => (
               <div
                 key={index}
-                className={`p-4 ${index !== completed.length - 1
+                className={`p-4 ${
+                  index !== completed.length - 1
                     ? "border-b border-gray-100"
                     : ""
-                  }`}
+                }`}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
                   {/* Doctor Image */}
@@ -539,7 +544,7 @@ const MyAppointments = () => {
                           <Star size={16} className="text-amber-500" />
                           Rate your experience with Dr. {item.docData.name}
                         </h5>
-                        
+
                         <div className="flex gap-1 mb-4">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
@@ -561,7 +566,7 @@ const MyAppointments = () => {
                             </button>
                           ))}
                         </div>
-                        
+
                         <div className="relative mb-4">
                           <div className="absolute top-3 left-3 flex items-start pointer-events-none">
                             <MessageSquare className="h-4 w-4 text-gray-400" />
@@ -578,7 +583,7 @@ const MyAppointments = () => {
                             {reviewComment.length}/500
                           </p>
                         </div>
-                        
+
                         <div className="flex justify-end gap-3">
                           <button
                             onClick={() => setActiveReviewId(null)}
@@ -623,10 +628,11 @@ const MyAppointments = () => {
             {cancelled.map((item, index) => (
               <div
                 key={index}
-                className={`p-4 ${index !== cancelled.length - 1
+                className={`p-4 ${
+                  index !== cancelled.length - 1
                     ? "border-b border-gray-100"
                     : ""
-                  }`}
+                }`}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
                   {/* Doctor Image */}

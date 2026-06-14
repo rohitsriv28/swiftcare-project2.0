@@ -47,7 +47,7 @@ const Header = () => {
           </div>
 
           <Link
-            to={'/doctors'}
+            to={"/doctors"}
             className="group flex items-center gap-2 bg-white px-8 py-3 rounded-full text-primary font-medium shadow-xl shadow-primary/20 hover:shadow-primary/30 hover:scale-105 transition-all duration-300"
           >
             <Calendar size={18} />

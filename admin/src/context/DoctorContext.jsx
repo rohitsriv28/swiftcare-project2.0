@@ -6,7 +6,7 @@ export const DoctorContext = createContext();
 
 const DoctorContextProvider = (props) => {
   const [dToken, setDToken] = useState(
-    localStorage.getItem("dToken") ? localStorage.getItem("dToken") : ""
+    localStorage.getItem("dToken") ? localStorage.getItem("dToken") : "",
   );
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [docAppointments, setDocAppointments] = useState([]);
@@ -21,7 +21,7 @@ const DoctorContextProvider = (props) => {
           headers: {
             Authorization: `Bearer ${dToken}`,
           },
-        }
+        },
       );
       if (data.success) {
         setDocAppointments(data.appointments);
@@ -46,7 +46,7 @@ const DoctorContextProvider = (props) => {
           headers: {
             Authorization: `Bearer ${dToken}`,
           },
-        }
+        },
       );
 
       const data = res.data;
@@ -75,7 +75,7 @@ const DoctorContextProvider = (props) => {
           headers: {
             Authorization: `Bearer ${dToken}`,
           },
-        }
+        },
       );
       if (data.success) {
         toast.success(data.message);
@@ -106,7 +106,7 @@ const DoctorContextProvider = (props) => {
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       toast.error(
-        error.response?.data?.message || "Failed to load dashboard data"
+        error.response?.data?.message || "Failed to load dashboard data",
       );
       setDashboardData(null);
     }
@@ -127,7 +127,7 @@ const DoctorContextProvider = (props) => {
     } catch (error) {
       console.error("Error fetching doctor profile:", error);
       toast.error(
-        error.response?.data?.message || "Failed to load doctor profile"
+        error.response?.data?.message || "Failed to load doctor profile",
       );
     }
   }, [dToken, backendUrl]);
@@ -141,7 +141,7 @@ const DoctorContextProvider = (props) => {
           headers: {
             Authorization: `Bearer ${dToken}`,
           },
-        }
+        },
       );
       if (data.success) {
         toast.success(data.message);

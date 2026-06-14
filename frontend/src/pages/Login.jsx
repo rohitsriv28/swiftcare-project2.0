@@ -67,10 +67,11 @@ const Login = () => {
           <div className="flex border-b">
             <button
               onClick={() => setState("Login")}
-              className={`flex-1 py-4 font-medium text-center transition-all ${state === "Login"
+              className={`flex-1 py-4 font-medium text-center transition-all ${
+                state === "Login"
                   ? "text-primary border-b-2 border-primary"
                   : "text-gray-500 hover:text-gray-700"
-                }`}
+              }`}
             >
               <span className="flex items-center justify-center gap-2">
                 <LogIn size={18} />
@@ -79,10 +80,11 @@ const Login = () => {
             </button>
             <button
               onClick={() => setState("Signup")}
-              className={`flex-1 py-4 font-medium text-center transition-all ${state === "Signup"
+              className={`flex-1 py-4 font-medium text-center transition-all ${
+                state === "Signup"
                   ? "text-primary border-b-2 border-primary"
                   : "text-gray-500 hover:text-gray-700"
-                }`}
+              }`}
             >
               <span className="flex items-center justify-center gap-2">
                 <UserPlus size={18} />
@@ -105,7 +107,9 @@ const Login = () => {
 
             {state === "Signup" && (
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Full Name
+                </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <User size={18} className="text-gray-400" />
@@ -123,7 +127,9 @@ const Login = () => {
             )}
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Email Address</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Email Address
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail size={18} className="text-gray-400" />
@@ -141,7 +147,9 @@ const Login = () => {
 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
                 {state === "Login" && (
                   <a href="#" className="text-xs text-primary hover:underline">
                     Forgot password?

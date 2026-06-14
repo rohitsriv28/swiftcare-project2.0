@@ -1,7 +1,16 @@
 import { useState, useEffect, useContext } from "react";
 import { DoctorContext } from "../../context/DoctorContext";
 import { AppContext } from "../../context/AppContext";
-import { User, Calendar, CheckSquare, X, BadgeIndianRupee, RefreshCw, Clock, DollarSign } from "lucide-react";
+import {
+  User,
+  Calendar,
+  CheckSquare,
+  X,
+  BadgeIndianRupee,
+  RefreshCw,
+  Clock,
+  DollarSign,
+} from "lucide-react";
 
 const DoctorDashboard = () => {
   const {
@@ -145,7 +154,9 @@ const DoctorDashboard = () => {
                   {stat.value}
                 </p>
                 {stat.description && (
-                  <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {stat.description}
+                  </p>
                 )}
               </div>
               <div className={`p-3 ${stat.color} rounded-full`}>
@@ -185,7 +196,9 @@ const DoctorDashboard = () => {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{appointment.userData?.name}</p>
+                  <p className="font-medium truncate">
+                    {appointment.userData?.name}
+                  </p>
                   <p className="text-xs text-gray-500">
                     {slotDate(appointment.slotDate)} • {appointment.slotTime}
                   </p>
@@ -202,7 +215,8 @@ const DoctorDashboard = () => {
                     {appointment.payment ? "Paid" : "Pending"}
                   </span>
                   <span className="text-xs font-medium mt-1">
-                    {currencySymbol}{appointment.amount}
+                    {currencySymbol}
+                    {appointment.amount}
                   </span>
                 </div>
               </div>
@@ -218,9 +232,12 @@ const DoctorDashboard = () => {
       {/* Recent Appointments */}
       <div className="bg-white rounded-lg shadow p-4 lg:p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold">Recent Completed Appointments</h2>
+          <h2 className="text-lg font-semibold">
+            Recent Completed Appointments
+          </h2>
           <span className="text-xs text-gray-500">
-            Showing {recentAppointments.length} of {dashboardData?.completedAppointments || 0}
+            Showing {recentAppointments.length} of{" "}
+            {dashboardData?.completedAppointments || 0}
           </span>
         </div>
 
@@ -293,7 +310,10 @@ const DoctorDashboard = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="px-4 py-8 text-center text-gray-500">
+                  <td
+                    colSpan="4"
+                    className="px-4 py-8 text-center text-gray-500"
+                  >
                     No recent completed appointments
                   </td>
                 </tr>

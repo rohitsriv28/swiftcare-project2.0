@@ -80,13 +80,13 @@ const Navbar = () => {
       const response = await axios.post(
         `${backendUrl}/api/user/search-doctors`,
         { query: searchQuery },
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
       );
 
       if (response.data.success) {
         // Filter out any results with undefined _id
         const validResults = response.data.doctors.filter(
-          (doctor) => doctor && doctor._id
+          (doctor) => doctor && doctor._id,
         );
         setSearchResults(validResults);
         setShowSearchResults(true);
@@ -302,8 +302,9 @@ const Navbar = () => {
                 </div>
                 <ChevronDown
                   size={14}
-                  className={`hidden md:block text-gray-700 transition-transform duration-300 ${showDropdown ? "transform rotate-180" : ""
-                    }`}
+                  className={`hidden md:block text-gray-700 transition-transform duration-300 ${
+                    showDropdown ? "transform rotate-180" : ""
+                  }`}
                 />
               </div>
 
@@ -363,10 +364,11 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`${showMenu
-          ? "fixed inset-0 z-50 bg-white transform translate-x-0"
-          : "fixed inset-0 z-50 bg-white transform translate-x-full"
-          } transition-transform duration-300 ease-in-out md:hidden`}
+        className={`${
+          showMenu
+            ? "fixed inset-0 z-50 bg-white transform translate-x-0"
+            : "fixed inset-0 z-50 bg-white transform translate-x-full"
+        } transition-transform duration-300 ease-in-out md:hidden`}
       >
         <div className="flex items-center justify-between p-4 border-b">
           <span className="text-primary font-bold text-xl">SwiftCare</span>
@@ -384,9 +386,10 @@ const Navbar = () => {
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `flex items-center gap-3 p-2.5 rounded-lg ${isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-gray-700 hover:bg-gray-50"
+                `flex items-center gap-3 p-2.5 rounded-lg ${
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-700 hover:bg-gray-50"
                 }`
               }
               onClick={() => setShowMenu(false)}
@@ -398,9 +401,10 @@ const Navbar = () => {
             <NavLink
               to="/doctors"
               className={({ isActive }) =>
-                `flex items-center gap-3 p-2.5 rounded-lg ${isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-gray-700 hover:bg-gray-50"
+                `flex items-center gap-3 p-2.5 rounded-lg ${
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-700 hover:bg-gray-50"
                 }`
               }
               onClick={() => setShowMenu(false)}
@@ -412,9 +416,10 @@ const Navbar = () => {
             <NavLink
               to="/about"
               className={({ isActive }) =>
-                `flex items-center gap-3 p-2.5 rounded-lg ${isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-gray-700 hover:bg-gray-50"
+                `flex items-center gap-3 p-2.5 rounded-lg ${
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-700 hover:bg-gray-50"
                 }`
               }
               onClick={() => setShowMenu(false)}
@@ -426,9 +431,10 @@ const Navbar = () => {
             <NavLink
               to="/contact"
               className={({ isActive }) =>
-                `flex items-center gap-3 p-2.5 rounded-lg ${isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-gray-700 hover:bg-gray-50"
+                `flex items-center gap-3 p-2.5 rounded-lg ${
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-700 hover:bg-gray-50"
                 }`
               }
               onClick={() => setShowMenu(false)}
@@ -443,9 +449,10 @@ const Navbar = () => {
                 <NavLink
                   to="/my-profile"
                   className={({ isActive }) =>
-                    `flex items-center gap-3 p-2.5 rounded-lg ${isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-gray-700 hover:bg-gray-50"
+                    `flex items-center gap-3 p-2.5 rounded-lg ${
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`
                   }
                   onClick={() => setShowMenu(false)}
@@ -457,9 +464,10 @@ const Navbar = () => {
                 <NavLink
                   to="/my-appointments"
                   className={({ isActive }) =>
-                    `flex items-center gap-3 p-2.5 rounded-lg ${isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-gray-700 hover:bg-gray-50"
+                    `flex items-center gap-3 p-2.5 rounded-lg ${
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`
                   }
                   onClick={() => setShowMenu(false)}

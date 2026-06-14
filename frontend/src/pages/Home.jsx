@@ -10,9 +10,6 @@ const Home = () => {
       <div className="relative z-10">
         <Header />
       </div>
-      {/* <div className="mt-10 md:mt-16">
-        <SpecialityMenu />
-      </div> */}
       <div className="mt-8">
         <RecommendedDocs />
       </div>

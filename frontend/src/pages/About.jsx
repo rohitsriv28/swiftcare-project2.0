@@ -234,7 +234,10 @@ const About = () => {
               </p>
             </div>
             <div className="flex flex-wrap gap-4">
-              <Link to={'/doctors'} className="bg-white text-primary px-8 py-3 rounded-lg font-semibold shadow-md hover:bg-gray-100 transition-all duration-300">
+              <Link
+                to={"/doctors"}
+                className="bg-white text-primary px-8 py-3 rounded-lg font-semibold shadow-md hover:bg-gray-100 transition-all duration-300"
+              >
                 Find a Doctor
               </Link>
               <button className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition-all duration-300">

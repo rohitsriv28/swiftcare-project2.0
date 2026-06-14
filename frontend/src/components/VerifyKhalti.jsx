@@ -82,7 +82,7 @@ const VerifyKhalti = () => {
       const response = await axios.post(
         `${backendUrl}/api/user/verify-khalti`,
         { pidx, appointmentId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.data.success) {
@@ -92,9 +92,7 @@ const VerifyKhalti = () => {
 
         // Handle amount conversion properly (Khalti returns amount in Paisa, so divide by 100 to get NPR)
         const responseData = response.data.data;
-        const amountInNPR = responseData.amount
-          ? responseData.amount / 100
-          : 0;
+        const amountInNPR = responseData.amount ? responseData.amount / 100 : 0;
 
         setPaymentDetails({
           ...responseData,
@@ -107,7 +105,7 @@ const VerifyKhalti = () => {
     } catch (error) {
       console.error("Payment verification failed:", error);
       toast.error(
-        error.response?.data?.message || "Payment verification failed"
+        error.response?.data?.message || "Payment verification failed",
       );
       setStatus("error");
       setPaymentStatus("failed");
@@ -294,13 +292,14 @@ const VerifyKhalti = () => {
                     <button
                       onClick={() =>
                         copyTransactionId(
-                          paymentDetails.transaction_id || paymentDetails.pidx
+                          paymentDetails.transaction_id || paymentDetails.pidx,
                         )
                       }
-                      className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${copied
+                      className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+                        copied
                           ? "bg-green-100 text-green-600"
                           : "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800"
-                        }`}
+                      }`}
                       title={copied ? "Copied!" : "Copy Transaction ID"}
                     >
                       {copied ? (
@@ -331,13 +330,16 @@ const VerifyKhalti = () => {
                 <span className="text-gray-600">Status:</span>
                 <div className="flex items-center gap-2">
                   <div
-                    className={`w-2 h-2 ${status === "success" ? "bg-green-500" : "bg-red-500"
-                      } rounded-full ${status === "success" ? "animate-pulse" : ""
-                      }`}
+                    className={`w-2 h-2 ${
+                      status === "success" ? "bg-green-500" : "bg-red-500"
+                    } rounded-full ${
+                      status === "success" ? "animate-pulse" : ""
+                    }`}
                   ></div>
                   <span
-                    className={`font-semibold ${status === "success" ? "text-green-600" : "text-red-600"
-                      }`}
+                    className={`font-semibold ${
+                      status === "success" ? "text-green-600" : "text-red-600"
+                    }`}
                   >
                     {status === "success" ? "Completed" : "Failed"}
                   </span>

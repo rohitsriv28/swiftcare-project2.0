@@ -269,13 +269,13 @@ const AddDoctor = () => {
       formDataToSend.append("about", formData.about);
       formDataToSend.append(
         "address",
-        JSON.stringify({ line1: formData.address1, line2: formData.address2 })
+        JSON.stringify({ line1: formData.address1, line2: formData.address2 }),
       );
 
       const { data } = await axios.post(
         `${backendURL}/api/admin/add-doctor`,
         formDataToSend,
-        { headers: { Authorization: `Bearer ${aToken}` } }
+        { headers: { Authorization: `Bearer ${aToken}` } },
       );
 
       if (data.success) {

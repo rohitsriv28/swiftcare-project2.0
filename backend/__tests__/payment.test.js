@@ -25,10 +25,8 @@ jest.unstable_mockModule("crypto", () => ({
 process.env.RAZORPAY_KEY_ID = "fake_razorpay_key";
 process.env.RAZORPAY_KEY_SECRET = "fake_razorpay_secret";
 
-const { verifyRazorpayPayment } = await import(
-  "../controllers/paymentController.js"
-);
-
+const { verifyRazorpayPayment } =
+  await import("../controllers/paymentController.js");
 
 describe("Payment Controller Tests (Razorpay HMAC verification)", () => {
   let mockReq;
@@ -56,7 +54,9 @@ describe("Payment Controller Tests (Razorpay HMAC verification)", () => {
 
     cryptoMock.createHmac.mockReturnValue({
       update: jest.fn().mockReturnThis(),
-      digest: jest.fn().mockReturnValue("expected_valid_hash_generated_by_crypto"),
+      digest: jest
+        .fn()
+        .mockReturnValue("expected_valid_hash_generated_by_crypto"),
     });
 
     await verifyRazorpayPayment(mockReq, mockRes);

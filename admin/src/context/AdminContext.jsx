@@ -6,7 +6,7 @@ export const AdminContext = createContext();
 
 const AdminContextProvider = (props) => {
   const [aToken, setAToken] = useState(
-    localStorage.getItem("aToken") ? localStorage.getItem("aToken") : ""
+    localStorage.getItem("aToken") ? localStorage.getItem("aToken") : "",
   );
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -22,7 +22,7 @@ const AdminContextProvider = (props) => {
       const { data } = await axios.post(
         backendURL + "/api/admin/all-doctors",
         {},
-        { headers: { Authorization: `Bearer ${aToken}` } }
+        { headers: { Authorization: `Bearer ${aToken}` } },
       );
       if (data.success) {
         console.log("Retrieved doctors:", data.data.length);
@@ -45,7 +45,7 @@ const AdminContextProvider = (props) => {
       const { data } = await axios.post(
         backendURL + "/api/admin/change-availability",
         { docId },
-        { headers: { Authorization: `Bearer ${aToken}` } }
+        { headers: { Authorization: `Bearer ${aToken}` } },
       );
       if (data.success) {
         toast.success(data.message);
@@ -65,7 +65,7 @@ const AdminContextProvider = (props) => {
       setIsLoading(true);
       const { data } = await axios.get(
         `${backendURL}/api/admin/all-appointments?limit=${limit}`,
-        { headers: { Authorization: `Bearer ${aToken}` } }
+        { headers: { Authorization: `Bearer ${aToken}` } },
       );
       if (data.success) {
         setAppointments(data.appointments);
@@ -90,10 +90,10 @@ const AdminContextProvider = (props) => {
       setIsLoading(true);
       const { data } = await axios.get(
         `${backendURL}/api/admin/all-appointments?limit=${limit}&cursor=${appointmentsCursor}`,
-        { headers: { Authorization: `Bearer ${aToken}` } }
+        { headers: { Authorization: `Bearer ${aToken}` } },
       );
       if (data.success) {
-        setAppointments(prev => [...prev, ...data.appointments]);
+        setAppointments((prev) => [...prev, ...data.appointments]);
         if (data.pagination) {
           setAppointmentsCursor(data.pagination.nextCursor);
           setHasMoreAppointments(data.pagination.hasNextPage);
@@ -120,7 +120,7 @@ const AdminContextProvider = (props) => {
       const { data } = await axios.post(
         backendURL + "/api/admin/cancel-appointment",
         { appointmentId },
-        { headers: { Authorization: `Bearer ${aToken}` } }
+        { headers: { Authorization: `Bearer ${aToken}` } },
       );
       if (data.success) {
         toast.success(data.message);

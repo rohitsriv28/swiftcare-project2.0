@@ -31,10 +31,7 @@ export const userLoginValidation = [
     .isEmail()
     .withMessage("Format must be a valid email address")
     .normalizeEmail(),
-  body("password")
-    .trim()
-    .notEmpty()
-    .withMessage("Password is required"),
+  body("password").trim().notEmpty().withMessage("Password is required"),
 ];
 
 export const bookingValidation = [
@@ -70,14 +67,8 @@ export const updateProfileValidation = [
     .trim()
     .isLength({ min: 10, max: 15 })
     .withMessage("Phone must be between 10 and 15 digits"),
-  body("dob")
-    .optional()
-    .trim()
-    .isString(),
-  body("gender")
-    .optional()
-    .trim()
-    .isString(),    
+  body("dob").optional().trim().isString(),
+  body("gender").optional().trim().isString(),
   body("address")
     .optional()
     .custom((value) => {
@@ -110,9 +101,18 @@ export const razorpayValidation = [
 ];
 
 export const verifyRazorpayValidation = [
-  body("razorpay_order_id").trim().notEmpty().withMessage("Order ID is required"),
-  body("razorpay_payment_id").trim().notEmpty().withMessage("Payment ID is required"),
-  body("razorpay_signature").trim().notEmpty().withMessage("Signature is required"),
+  body("razorpay_order_id")
+    .trim()
+    .notEmpty()
+    .withMessage("Order ID is required"),
+  body("razorpay_payment_id")
+    .trim()
+    .notEmpty()
+    .withMessage("Payment ID is required"),
+  body("razorpay_signature")
+    .trim()
+    .notEmpty()
+    .withMessage("Signature is required"),
 ];
 
 export const khaltiValidation = [

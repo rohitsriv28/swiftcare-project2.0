@@ -5,7 +5,10 @@ import doctorModel from "../models/doctorModel.js";
 import jwt from "jsonwebtoken";
 import appointmentModel from "../models/appointmentModel.js";
 import userModel from "../models/userModel.js";
-import { calculatePerformanceScore, calculateCancellationRisk } from "../utils/scoringService.js";
+import {
+  calculatePerformanceScore,
+  calculateCancellationRisk,
+} from "../utils/scoringService.js";
 
 //API for adding doctor
 const addDoctor = async (req, res) => {
@@ -50,7 +53,9 @@ const addDoctor = async (req, res) => {
 
     // Email validation
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ success: false, message: "Invalid email format" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email format" });
     }
 
     // Password validation
@@ -65,7 +70,8 @@ const addDoctor = async (req, res) => {
     if (!/^[A-Za-z][A-Za-z\s.,]*$/.test(degree)) {
       return res.status(400).json({
         success: false,
-        message: "Degree should only contain alphabets, spaces, periods, commas and must start with an alphabet",
+        message:
+          "Degree should only contain alphabets, spaces, periods, commas and must start with an alphabet",
       });
     }
 
@@ -79,14 +85,19 @@ const addDoctor = async (req, res) => {
     }
 
     // Image file validation
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+      "image/webp",
+    ];
     if (!allowedMimeTypes.includes(imageFile.mimetype)) {
       return res.status(400).json({
         success: false,
         message: "Image must be in JPEG, PNG, or WebP format",
       });
     }
-    
+
     // Size validation (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB in bytes
     if (imageFile.size > maxSize) {
@@ -117,7 +128,7 @@ const addDoctor = async (req, res) => {
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
-        }
+        },
       );
       stream.end(imageFile.buffer);
     });
@@ -181,11 +192,9 @@ const adminLogin = async (req, res) => {
         .json({ success: false, message: "Invalid email or password" });
     }
 
-    const token = jwt.sign(
-      { email, role: "admin" },
-      process.env.JWT_SECRET,
-      { expiresIn: "12h" }
-    );
+    const token = jwt.sign({ email, role: "admin" }, process.env.JWT_SECRET, {
+      expiresIn: "12h",
+    });
 
     return res.status(200).json({
       success: true,
@@ -258,9 +267,12 @@ const appointmentCancellationByAdmin = async (req, res) => {
   try {
     const { appointmentId } = req.body;
     const appointmentData = await appointmentModel.findById(appointmentId);
-    
+
     if (appointmentData.isCancelled) {
-      return res.json({ success: false, message: "Appointment already cancelled" });
+      return res.json({
+        success: false,
+        message: "Appointment already cancelled",
+      });
     }
 
     await appointmentModel.findByIdAndUpdate(appointmentId, {
@@ -292,11 +304,18 @@ const adminDashboarddata = async (req, res) => {
   try {
     // 1. Core Counts directly from DB
     const totalDoctors = await doctorModel.countDocuments();
-    const activeDoctors = await doctorModel.countDocuments({ availability: true });
+    const activeDoctors = await doctorModel.countDocuments({
+      availability: true,
+    });
     const totalAppointments = await appointmentModel.countDocuments();
     const totalPatients = await userModel.countDocuments();
-    const pendingAppointments = await appointmentModel.countDocuments({ isCancelled: false });
-    const paidAppointments = await appointmentModel.countDocuments({ isCancelled: false, payment: true });
+    const pendingAppointments = await appointmentModel.countDocuments({
+      isCancelled: false,
+    });
+    const paidAppointments = await appointmentModel.countDocuments({
+      isCancelled: false,
+      payment: true,
+    });
 
     // 2. Today's Appointments
     const today = new Date();
@@ -309,7 +328,7 @@ const adminDashboarddata = async (req, res) => {
     // 3. Total Revenue via Aggregation
     const revenueAgg = await appointmentModel.aggregate([
       { $match: { isCancelled: false, payment: true } },
-      { $group: { _id: null, total: { $sum: "$amount" } } }
+      { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
     const totalRevenue = revenueAgg[0]?.total || 0;
 
@@ -322,41 +341,57 @@ const adminDashboarddata = async (req, res) => {
     // 5. Top 5 Doctors via Aggregation
     const topDoctorsAgg = await appointmentModel.aggregate([
       { $match: { isCancelled: false, payment: true } },
-      { $group: { _id: "$docId", appointments: { $sum: 1 }, revenue: { $sum: "$amount" } } },
+      {
+        $group: {
+          _id: "$docId",
+          appointments: { $sum: 1 },
+          revenue: { $sum: "$amount" },
+        },
+      },
       { $sort: { appointments: -1 } },
-      { $limit: 5 }
+      { $limit: 5 },
     ]);
-    
+
     // Fetch doctor metadata for top doctors only
     const doctorIds = topDoctorsAgg.map((agg) => agg._id);
     const topDocsMetadata = await doctorModel.find({ _id: { $in: doctorIds } });
-    
+
     const topDoctors = topDoctorsAgg.map((agg) => {
-      const doc = topDocsMetadata.find((d) => d._id.toString() === agg._id.toString());
+      const doc = topDocsMetadata.find(
+        (d) => d._id.toString() === agg._id.toString(),
+      );
       return {
         id: agg._id,
         name: doc?.name || "Unknown",
         image: doc?.image || "",
         speciality: doc?.speciality || "",
         appointments: agg.appointments,
-        revenue: agg.revenue
+        revenue: agg.revenue,
       };
     });
 
     // 6. Appointments by Specialty
     const specialtyAgg = await appointmentModel.aggregate([
       { $match: { isCancelled: false, payment: true } },
-      { $group: { _id: "$docData.speciality", count: { $sum: 1 }, revenue: { $sum: "$amount" } } }
+      {
+        $group: {
+          _id: "$docData.speciality",
+          count: { $sum: 1 },
+          revenue: { $sum: "$amount" },
+        },
+      },
     ]);
-    const specialtyStats = specialtyAgg.map(agg => ({
+    const specialtyStats = specialtyAgg.map((agg) => ({
       name: agg._id || "Unknown",
       count: agg.count,
-      revenue: agg.revenue
+      revenue: agg.revenue,
     }));
 
     // 7. Last 30 Days mapping (Fetch only recent DB records rather than whole collection)
     const thirtyDaysAgo = Date.now() - 31 * 24 * 60 * 60 * 1000; // 31 days buffer
-    const recentAppointments = await appointmentModel.find({ date: { $gte: thirtyDaysAgo } });
+    const recentAppointments = await appointmentModel.find({
+      date: { $gte: thirtyDaysAgo },
+    });
 
     const dashboardData = {
       stats: {
@@ -398,11 +433,11 @@ function getLast30DaysAppointments(appointments) {
     const displayDate = `${day}/${month}`;
 
     const allDayAppointments = appointments.filter(
-      (app) => app.slotDate === dateString && !app.isCancelled
+      (app) => app.slotDate === dateString && !app.isCancelled,
     );
 
     const paidDayAppointments = appointments.filter(
-      (app) => app.slotDate === dateString && !app.isCancelled && app.payment
+      (app) => app.slotDate === dateString && !app.isCancelled && app.payment,
     );
 
     result.push({
@@ -425,14 +460,22 @@ const getDoctorPerformance = async (req, res) => {
     res.json({ success: true, performance });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: error.message || "Internal server error" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: error.message || "Internal server error",
+      });
   }
 };
 
 // API to get all doctors performance scores (for Leaderboard/Rankings)
 const getAllDoctorPerformance = async (req, res) => {
   try {
-    const doctors = await doctorModel.find({}).select("_id name image speciality averageRating").lean();
+    const doctors = await doctorModel
+      .find({})
+      .select("_id name image speciality averageRating")
+      .lean();
     const performanceList = [];
     for (const doc of doctors) {
       const perf = await calculatePerformanceScore(doc._id);
@@ -449,14 +492,19 @@ const getAllDoctorPerformance = async (req, res) => {
         scores: perf.scores,
       });
     }
-    
+
     // Sort performanceList by totalScore descending so the leaderboard is ranked
     performanceList.sort((a, b) => b.scores.totalScore - a.scores.totalScore);
-    
+
     res.json({ success: true, data: performanceList });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: error.message || "Internal server error" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: error.message || "Internal server error",
+      });
   }
 };
 
@@ -468,7 +516,12 @@ const getCancellationRisk = async (req, res) => {
     res.json({ success: true, risk });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: error.message || "Internal server error" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: error.message || "Internal server error",
+      });
   }
 };
 

@@ -22,8 +22,12 @@ export const RATE_LIMITS = {
 };
 
 export const DEFAULT_ALLOWED_ORIGINS = [
-  process.env.FRONTEND_URL ? process.env.FRONTEND_URL.trim() : "http://localhost:3000",
-  process.env.ADMIN_URL ? process.env.ADMIN_URL.trim() : "http://localhost:5174",
+  process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.trim()
+    : "http://localhost:3000",
+  process.env.ADMIN_URL
+    ? process.env.ADMIN_URL.trim()
+    : "http://localhost:5174",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
@@ -42,6 +46,7 @@ export const getAllowedOrigins = () => {
 
 export const PORT = Number(process.env.PORT) || 8001;
 
-export const MAX_EXPECTED_APPOINTMENTS = Number(process.env.MAX_EXPECTED_APPOINTMENTS) || 200;
-export const MAX_EXPECTED_REVENUE = Number(process.env.MAX_EXPECTED_REVENUE) || 50000;
-
+export const MAX_EXPECTED_APPOINTMENTS =
+  Number(process.env.MAX_EXPECTED_APPOINTMENTS) || 200;
+export const MAX_EXPECTED_REVENUE =
+  Number(process.env.MAX_EXPECTED_REVENUE) || 50000;

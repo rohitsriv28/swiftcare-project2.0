@@ -244,10 +244,11 @@ const DoctorProfile = () => {
               <div className="mt-3 flex items-center gap-3 justify-center md:justify-start">
                 <span className="bg-blue-500 bg-opacity-30 px-3 py-1 rounded-full text-sm font-medium text-white flex items-center gap-1">
                   <span
-                    className={`h-2 w-2 rounded-full ${doctorProfile.availability
+                    className={`h-2 w-2 rounded-full ${
+                      doctorProfile.availability
                         ? "bg-green-400"
                         : "bg-gray-300"
-                      }`}
+                    }`}
                   ></span>
                   {doctorProfile.availability ? "Available" : "Unavailable"}
                 </span>
@@ -320,10 +321,11 @@ const DoctorProfile = () => {
                     />
                   )}
                   <span
-                    className={`text-sm ${doctorProfile.availability
+                    className={`text-sm ${
+                      doctorProfile.availability
                         ? "text-green-600"
                         : "text-gray-600"
-                      }`}
+                    }`}
                   >
                     {doctorProfile.availability ? "Available" : "Unavailable"}
                   </span>

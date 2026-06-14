@@ -12,14 +12,16 @@ const AppContextProvider = (props) => {
   const [doctorsCursor, setDoctorsCursor] = useState(null);
   const [hasMoreDoctors, setHasMoreDoctors] = useState(true);
   const [token, setToken] = useState(
-    localStorage.getItem("token") ? localStorage.getItem("token") : false
+    localStorage.getItem("token") ? localStorage.getItem("token") : false,
   );
   const [userData, setUserData] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
 
   const getDoctorsData = async () => {
     try {
-      const { data } = await axios.get(backendUrl + "/api/doctor/list?limit=10");
+      const { data } = await axios.get(
+        backendUrl + "/api/doctor/list?limit=10",
+      );
       if (data.success) {
         setDoctors(data.doctors);
         if (data.pagination) {
@@ -38,9 +40,11 @@ const AppContextProvider = (props) => {
   const loadMoreDoctors = async () => {
     if (!hasMoreDoctors || !doctorsCursor) return;
     try {
-      const { data } = await axios.get(`${backendUrl}/api/doctor/list?limit=10&cursor=${doctorsCursor}`);
+      const { data } = await axios.get(
+        `${backendUrl}/api/doctor/list?limit=10&cursor=${doctorsCursor}`,
+      );
       if (data.success) {
-        setDoctors(prev => [...prev, ...data.doctors]);
+        setDoctors((prev) => [...prev, ...data.doctors]);
         if (data.pagination) {
           setDoctorsCursor(data.pagination.nextCursor);
           setHasMoreDoctors(data.pagination.hasNextPage);

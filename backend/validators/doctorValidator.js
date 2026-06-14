@@ -18,19 +18,12 @@ export const updateDoctorProfileValidation = [
     .withMessage("docId is required")
     .isMongoId()
     .withMessage("Valid docId is required"),
-  body("fee")
-    .optional()
-    .isNumeric()
-    .withMessage("Fee must be numeric"),
+  body("fee").optional().isNumeric().withMessage("Fee must be numeric"),
   body("availability")
     .optional()
     .isBoolean()
     .withMessage("Availability must be a boolean"),
-  body("about")
-    .optional()
-    .trim()
-    .isString()
-    .escape(),
+  body("about").optional().trim().isString().escape(),
   body("address")
     .optional()
     .custom((value) => {

@@ -43,22 +43,23 @@ const AllAppointments = () => {
     (item) =>
       item.userData.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.docData.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.docData.speciality.toLowerCase().includes(searchTerm.toLowerCase())
+      item.docData.speciality.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Risk badge component that uses data from backend
   const RiskBadge = ({ riskData, isCancelled }) => {
-
     if (isCancelled || !riskData) return null;
 
     let colorClass = "bg-green-100 text-green-700 border-green-200";
-    if (riskData.riskLevel === "High") colorClass = "bg-red-100 text-red-700 border-red-200";
-    else if (riskData.riskLevel === "Medium") colorClass = "bg-orange-100 text-orange-700 border-orange-200";
+    if (riskData.riskLevel === "High")
+      colorClass = "bg-red-100 text-red-700 border-red-200";
+    else if (riskData.riskLevel === "Medium")
+      colorClass = "bg-orange-100 text-orange-700 border-orange-200";
 
     return (
-      <div 
+      <div
         className={`mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${colorClass}`}
-        title={`Risk Score: ${riskData.riskScore}\nFactors: ${riskData.factors.join(', ')}`}
+        title={`Risk Score: ${riskData.riskScore}\nFactors: ${riskData.factors.join(", ")}`}
       >
         <AlertTriangle size={10} />
         {riskData.riskLevel} Risk ({riskData.riskScore}%)
@@ -204,10 +205,13 @@ const AllAppointments = () => {
                         {item.slotTime}
                       </p>
                     </div>
-                    
+
                     {/* Add Risk Badge Here */}
                     <div className="mt-1">
-                      <RiskBadge riskData={item.cancellationRisk} isCancelled={item.isCancelled} />
+                      <RiskBadge
+                        riskData={item.cancellationRisk}
+                        isCancelled={item.isCancelled}
+                      />
                     </div>
                   </div>
 

@@ -65,11 +65,11 @@ export const addDoctorValidation = [
     // Address often comes in as a stringified JSON from FormData, so we validate it is a JSON string
     .custom((value) => {
       try {
-         JSON.parse(value);
-         return true;
+        JSON.parse(value);
+        return true;
       } catch (e) {
-         if (typeof value === "object") return true; 
-         throw new Error("Address must be a valid JSON structure");
+        if (typeof value === "object") return true;
+        throw new Error("Address must be a valid JSON structure");
       }
     }),
 ];

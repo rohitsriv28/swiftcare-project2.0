@@ -12,10 +12,11 @@ const transactionSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-
-const transactionModel = mongoose.models.transactions || mongoose.model("transactions", transactionSchema);
+const transactionModel =
+  mongoose.models.transactions ||
+  mongoose.model("transactions", transactionSchema);
 
 export default transactionModel;

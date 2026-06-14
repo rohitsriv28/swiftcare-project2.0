@@ -65,7 +65,7 @@ describe("Auth Middleware Tests", () => {
 
     expect(jwt.verify).toHaveBeenCalledWith(
       "validToken123",
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
     );
     expect(mockReq.userId).toBe("user123");
     expect(mockReq.body.userId).toBe("user123");

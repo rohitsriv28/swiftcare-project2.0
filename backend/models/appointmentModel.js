@@ -20,7 +20,7 @@ const appointmentSchema = new mongoose.Schema(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 appointmentSchema.index({ userId: 1, createdAt: -1 });

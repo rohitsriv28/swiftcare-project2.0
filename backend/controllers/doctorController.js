@@ -12,7 +12,9 @@ const changeAvailability = async (req, res) => {
     const { docId } = req.body;
     const docData = await doctorModel.findById(docId);
     if (!docData) {
-      return res.status(404).json({ success: false, message: "Doctor not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found" });
     }
     await doctorModel.findByIdAndUpdate(docId, {
       availability: !docData.availability,
@@ -33,7 +35,7 @@ const doctorList = async (req, res) => {
   try {
     const { cursor, limit = 10 } = req.query;
     const limitNum = parseInt(limit, 10) || 10;
-    
+
     // Build query with cursor
     const query = {};
     if (cursor) {
@@ -50,7 +52,7 @@ const doctorList = async (req, res) => {
 
     let nextCursor = null;
     let hasNextPage = false;
-    
+
     // If we fetched more than the limit, we have a next page
     if (doctors.length > limitNum) {
       hasNextPage = true;
@@ -59,15 +61,15 @@ const doctorList = async (req, res) => {
       nextCursor = doctors[doctors.length - 1]._id;
     }
 
-    res.json({ 
-      success: true, 
-      data: doctors, 
+    res.json({
+      success: true,
+      data: doctors,
       doctors,
       pagination: {
         nextCursor,
         hasNextPage,
-        limit: limitNum
-      }
+        limit: limitNum,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -98,7 +100,7 @@ const doctorLogin = async (req, res) => {
     const token = jwt.sign(
       { id: doctor._id, role: "doctor" },
       process.env.JWT_SECRET,
-      { expiresIn: TOKEN_EXPIRY.doctor }
+      { expiresIn: TOKEN_EXPIRY.doctor },
     );
 
     res.json({
@@ -146,7 +148,9 @@ const markAppointmentCompleted = async (req, res) => {
     const appointmentData = await appointmentModel.findById(appointmentId);
 
     if (!appointmentData) {
-      return res.status(404).json({ success: false, message: "Appointment not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
     }
 
     if (appointmentData && appointmentData.docId.toString() === docId) {
@@ -180,12 +184,19 @@ const markAppointmentCancelled = async (req, res) => {
     const appointmentData = await appointmentModel.findById(appointmentId);
 
     if (!appointmentData) {
-      return res.status(404).json({ success: false, message: "Appointment not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
     }
 
     if (appointmentData && appointmentData.docId.toString() === docId) {
       if (appointmentData.isCancelled) {
-        return res.status(409).json({ success: false, message: "Appointment is already cancelled" });
+        return res
+          .status(409)
+          .json({
+            success: false,
+            message: "Appointment is already cancelled",
+          });
       }
 
       await appointmentModel.findByIdAndUpdate(appointmentId, {
@@ -307,7 +318,9 @@ const doctorProfile = async (req, res) => {
     let profileData = await doctorModel.findById(docId).select("-password");
 
     if (!profileData) {
-      return res.status(404).json({ success: false, message: "Doctor not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found" });
     }
 
     res.json({
@@ -348,7 +361,9 @@ const updateDoctorProfile = async (req, res) => {
       ...(imageUrl && { image: imageUrl }),
     });
     if (!updatedDoctor) {
-      return res.status(404).json({ success: false, message: "Doctor not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found" });
     }
     res.json({
       success: true,
@@ -432,11 +447,15 @@ const getDoctorProfilePublic = async (req, res) => {
   try {
     const { docId } = req.params;
     if (!mongoose.isValidObjectId(docId)) {
-      return res.status(400).json({ success: false, message: "Invalid doctor ID format" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid doctor ID format" });
     }
     const doctor = await doctorModel.findById(docId).select("-password -email");
     if (!doctor) {
-      return res.status(404).json({ success: false, message: "Doctor not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found" });
     }
     res.json({
       success: true,

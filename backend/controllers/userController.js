@@ -102,7 +102,9 @@ const getProfile = async (req, res) => {
     const { userId } = req.body;
     const userData = await userModel.findById(userId).select("-password");
     if (!userData) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     res.status(200).json({
       success: true,
@@ -151,7 +153,9 @@ const updateProfile = async (req, res) => {
     // Final user data update
     const updatedUser = await userModel.findByIdAndUpdate(userId, updatedData);
     if (!updatedUser) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     res.status(200).json({
@@ -176,15 +180,22 @@ const bookAppointment = async (req, res) => {
     today.setHours(0, 0, 0, 0);
 
     if (bookingDate < today) {
-      return res.status(400).json({ success: false, message: "Cannot book appointments in the past" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Cannot book appointments in the past",
+        });
     }
 
     const docData = await doctorModel.findById(docId).select("-password");
     if (!docData || !docData.availability) {
-      return res.status(400).json({ success: false, message: "Doctor not available!" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Doctor not available!" });
     }
 
-    // Attempt to book the slot atomically. 
+    // Attempt to book the slot atomically.
     // The query checks that the specific slot time is NOT already in that day's array.
     const updatedDoctor = await doctorModel.findOneAndUpdate(
       {
@@ -194,12 +205,14 @@ const bookAppointment = async (req, res) => {
       {
         $push: { [`slots_booked.${slotDate}`]: slotTime },
       },
-      { new: true }
+      { new: true },
     );
 
     // If no document was returned, it means the condition failed (slot already taken)
     if (!updatedDoctor) {
-      return res.status(409).json({ success: false, message: "Slot is no longer available!" });
+      return res
+        .status(409)
+        .json({ success: false, message: "Slot is no longer available!" });
     }
 
     const userData = await userModel.findById(userId).select("-password");
@@ -207,7 +220,9 @@ const bookAppointment = async (req, res) => {
       await doctorModel.findByIdAndUpdate(docId, {
         $pull: { [`slots_booked.${slotDate}`]: slotTime },
       });
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     delete docData.slots_booked; // history of slots booked removed
 
@@ -249,7 +264,7 @@ const listAppointments = async (req, res) => {
     const { userId } = req.body;
     const { cursor, limit = 10 } = req.query;
     const limitNum = parseInt(limit, 10) || 10;
-    
+
     const query = { userId };
     if (cursor) {
       query._id = { $lt: cursor };
@@ -260,7 +275,7 @@ const listAppointments = async (req, res) => {
       .sort({ _id: -1 })
       .limit(limitNum + 1)
       .lean();
-    
+
     let nextCursor = null;
     let hasNextPage = false;
 
@@ -269,25 +284,29 @@ const listAppointments = async (req, res) => {
       appointments.pop();
       nextCursor = appointments[appointments.length - 1]._id;
     }
-    
-    // Fetch all reviews by this user to determine which appointments are reviewed
-    const userReviews = await reviewModel.find({ userId }).select("appointmentId");
-    const reviewedAppointmentIds = new Set(userReviews.map(r => r.appointmentId.toString()));
 
-    const appointmentsWithReviewStatus = appointments.map(app => ({
+    // Fetch all reviews by this user to determine which appointments are reviewed
+    const userReviews = await reviewModel
+      .find({ userId })
+      .select("appointmentId");
+    const reviewedAppointmentIds = new Set(
+      userReviews.map((r) => r.appointmentId.toString()),
+    );
+
+    const appointmentsWithReviewStatus = appointments.map((app) => ({
       ...app,
-      hasReviewed: reviewedAppointmentIds.has(app._id.toString())
+      hasReviewed: reviewedAppointmentIds.has(app._id.toString()),
     }));
 
-    res.json({ 
-      success: true, 
-      data: appointmentsWithReviewStatus, 
+    res.json({
+      success: true,
+      data: appointmentsWithReviewStatus,
       appointments: appointmentsWithReviewStatus,
       pagination: {
         nextCursor,
         hasNextPage,
-        limit: limitNum
-      }
+        limit: limitNum,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -301,7 +320,9 @@ const cancelAppointment = async (req, res) => {
     const { userId, appointmentId } = req.body;
     const appointmentData = await appointmentModel.findById(appointmentId);
     if (!appointmentData) {
-      return res.status(404).json({ success: false, message: "Appointment not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
     }
 
     // Validating user
@@ -313,7 +334,9 @@ const cancelAppointment = async (req, res) => {
     }
 
     if (appointmentData.isCancelled) {
-      return res.status(409).json({ success: false, message: "Appointment is already cancelled" });
+      return res
+        .status(409)
+        .json({ success: false, message: "Appointment is already cancelled" });
     }
 
     await appointmentModel.findByIdAndUpdate(appointmentId, {
@@ -348,33 +371,57 @@ const addReview = async (req, res) => {
     const { userId, appointmentId, rating, comment } = req.body;
 
     if (!appointmentId || !rating) {
-      return res.status(400).json({ success: false, message: "Appointment ID and rating are required" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Appointment ID and rating are required",
+        });
     }
 
     if (rating < 1 || rating > 5) {
-      return res.status(400).json({ success: false, message: "Rating must be between 1 and 5" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Rating must be between 1 and 5" });
     }
 
     // Retrieve appointment
     const appointment = await appointmentModel.findById(appointmentId);
     if (!appointment) {
-      return res.status(404).json({ success: false, message: "Appointment not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Appointment not found" });
     }
 
     // Verify ownership
     if (appointment.userId.toString() !== userId.toString()) {
-      return res.status(403).json({ success: false, message: "Unauthorized to review this appointment" });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Unauthorized to review this appointment",
+        });
     }
 
     // Verify status
     if (appointment.status !== "completed") {
-      return res.status(400).json({ success: false, message: "Only completed appointments can be reviewed" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Only completed appointments can be reviewed",
+        });
     }
 
     // Check existing review
     const existingReview = await reviewModel.findOne({ userId, appointmentId });
     if (existingReview) {
-      return res.status(409).json({ success: false, message: "You have already reviewed this appointment" });
+      return res
+        .status(409)
+        .json({
+          success: false,
+          message: "You have already reviewed this appointment",
+        });
     }
 
     // Create review
@@ -388,13 +435,18 @@ const addReview = async (req, res) => {
     await newReview.save();
 
     // Recalculate average rating
-    const doctorReviews = await reviewModel.find({ doctorId: appointment.docId });
+    const doctorReviews = await reviewModel.find({
+      doctorId: appointment.docId,
+    });
     const sumRatings = doctorReviews.reduce((sum, rev) => sum + rev.rating, 0);
-    const averageRating = doctorReviews.length > 0 ? sumRatings / doctorReviews.length : 0;
+    const averageRating =
+      doctorReviews.length > 0 ? sumRatings / doctorReviews.length : 0;
 
     await doctorModel.findByIdAndUpdate(appointment.docId, { averageRating });
 
-    res.status(201).json({ success: true, message: "Review submitted successfully" });
+    res
+      .status(201)
+      .json({ success: true, message: "Review submitted successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: error.message });
@@ -410,11 +462,12 @@ const getDoctorReviews = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const totalCount = await reviewModel.countDocuments({ doctorId });
-    
+
     // Aggregate to calculate average rating (could also just return the denormalised value from doctor doc)
     const doctor = await doctorModel.findById(doctorId).select("averageRating");
 
-    const reviews = await reviewModel.find({ doctorId })
+    const reviews = await reviewModel
+      .find({ doctorId })
       .populate("userId", "name image")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -429,7 +482,7 @@ const getDoctorReviews = async (req, res) => {
         page,
         limit,
         totalPages: Math.ceil(totalCount / limit),
-      }
+      },
     });
   } catch (error) {
     console.error(error);
@@ -441,15 +494,15 @@ const getDoctorReviews = async (req, res) => {
 const getRecommendations = async (req, res) => {
   try {
     const { speciality } = req.query;
-    
+
     // Base query: find available doctors, optionally filtered by speciality
     const query = { availability: true };
     if (speciality) {
       query.speciality = speciality;
     }
-    
+
     const doctors = await doctorModel.find(query).select("-password").lean();
-    
+
     if (!doctors.length) {
       return res.json({ success: true, data: [] });
     }
@@ -457,10 +510,10 @@ const getRecommendations = async (req, res) => {
     // Identify the max values for normalization
     let maxFee = 1;
     let maxExperience = 1;
-    
-    doctors.forEach(doc => {
+
+    doctors.forEach((doc) => {
       if (doc.fee > maxFee) maxFee = doc.fee;
-      
+
       // Parse experience e.g. "4 Years" -> 4
       const expYears = parseInt(doc.experience) || 0;
       if (expYears > maxExperience) maxExperience = expYears;
@@ -479,7 +532,7 @@ const getRecommendations = async (req, res) => {
     }
 
     // Score and rank doctors
-    const scoredDoctors = doctors.map(doc => {
+    const scoredDoctors = doctors.map((doc) => {
       // 1. Rating Score (35%)
       const rating = doc.averageRating || 0;
       const ratingScore = (rating / 5) * 35;
@@ -488,16 +541,19 @@ const getRecommendations = async (req, res) => {
       // Check how many slots are booked in the next 7 days
       let slotsBookedIn7Days = 0;
       if (doc.slots_booked) {
-        next7Days.forEach(dateStr => {
+        next7Days.forEach((dateStr) => {
           if (doc.slots_booked[dateStr]) {
             slotsBookedIn7Days += doc.slots_booked[dateStr].length;
           }
         });
       }
-      // Assuming a doctor has about 10 slots a day -> 70 slots a week max. 
+      // Assuming a doctor has about 10 slots a day -> 70 slots a week max.
       // Less booked slots -> higher availability score
       const maxSlotsWeekly = 70;
-      const availabilityRatio = Math.max(0, (maxSlotsWeekly - slotsBookedIn7Days) / maxSlotsWeekly);
+      const availabilityRatio = Math.max(
+        0,
+        (maxSlotsWeekly - slotsBookedIn7Days) / maxSlotsWeekly,
+      );
       const availabilityScore = availabilityRatio * 30;
 
       // 3. Experience Score (20%)
@@ -506,14 +562,15 @@ const getRecommendations = async (req, res) => {
 
       // 4. Fee Affordability Score (15%) - Inverse relationship
       // Lower fee = better affordability score
-      const affordabilityRatio = 1 - (doc.fee / maxFee);
+      const affordabilityRatio = 1 - doc.fee / maxFee;
       const affordabilityScore = affordabilityRatio * 15;
 
-      const totalRecommendationScore = ratingScore + availabilityScore + experienceScore + affordabilityScore;
+      const totalRecommendationScore =
+        ratingScore + availabilityScore + experienceScore + affordabilityScore;
 
       return {
         ...doc,
-        recommendationScore: totalRecommendationScore
+        recommendationScore: totalRecommendationScore,
       };
     });
 
@@ -522,7 +579,7 @@ const getRecommendations = async (req, res) => {
 
     res.json({
       success: true,
-      data: scoredDoctors
+      data: scoredDoctors,
     });
   } catch (error) {
     console.error("Recommendation Error:", error);
@@ -541,4 +598,4 @@ export {
   addReview,
   getDoctorReviews,
   getRecommendations,
-}
+};

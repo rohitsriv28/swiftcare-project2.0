@@ -110,8 +110,9 @@ const Doctors = () => {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Filter Section - Collapsible on Mobile */}
         <div
-          className={`w-full lg:w-1/4 ${showFilter ? "block" : "hidden"
-            } lg:block transition-all duration-300`}
+          className={`w-full lg:w-1/4 ${
+            showFilter ? "block" : "hidden"
+          } lg:block transition-all duration-300`}
         >
           <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
             <div className="bg-primary text-white p-3 flex items-center gap-2">
@@ -131,9 +132,10 @@ const Doctors = () => {
                   }}
                   className={`
                     flex items-center justify-between p-2 rounded-md cursor-pointer text-sm transition-all duration-200
-                    ${speciality === spec.name
-                      ? "bg-primary text-white font-medium"
-                      : "hover:bg-gray-100"
+                    ${
+                      speciality === spec.name
+                        ? "bg-primary text-white font-medium"
+                        : "hover:bg-gray-100"
                     }
                   `}
                 >
@@ -165,10 +167,11 @@ const Doctors = () => {
                     navigate(`/appointment/${doctor._id}`)
                   }
                   className={`bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 flex
-      ${doctor.availability
-                      ? "hover:shadow-md cursor-pointer transition-all duration-200 hover:bg-gray-50"
-                      : "opacity-75 cursor-not-allowed"
-                    }`}
+      ${
+        doctor.availability
+          ? "hover:shadow-md cursor-pointer transition-all duration-200 hover:bg-gray-50"
+          : "opacity-75 cursor-not-allowed"
+      }`}
                 >
                   {/* Doctor Image */}
                   <div className="relative w-20 sm:w-28 h-full overflow-hidden flex-shrink-0 min-h-[100px]">
@@ -177,8 +180,9 @@ const Doctors = () => {
                         <img
                           src={doctor.image}
                           alt={doctor.name}
-                          className={`w-full h-full object-cover ${!doctor.availability ? "grayscale" : ""
-                            }`}
+                          className={`w-full h-full object-cover ${
+                            !doctor.availability ? "grayscale" : ""
+                          }`}
                         />
                       ) : (
                         <UserCheck
@@ -281,7 +285,7 @@ const Doctors = () => {
           )}
 
           {/* Load More Button */}
-          {hasMoreDoctors && (!speciality) && filterDoc.length > 0 && (
+          {hasMoreDoctors && !speciality && filterDoc.length > 0 && (
             <div className="mt-8 flex justify-center">
               <button
                 onClick={loadMoreDoctors}

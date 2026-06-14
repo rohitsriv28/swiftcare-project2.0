@@ -4,9 +4,10 @@ import razorpay from "razorpay";
 import appointmentModel from "../models/appointmentModel.js";
 import transactionModel from "../models/transactionModel.js";
 
-const KHALTI_BASE_URL = process.env.KHALTI_ENV === "production"
-  ? "https://khalti.com/api/v2"
-  : "https://dev.khalti.com/api/v2";
+const KHALTI_BASE_URL =
+  process.env.KHALTI_ENV === "production"
+    ? "https://khalti.com/api/v2"
+    : "https://dev.khalti.com/api/v2";
 
 // API for Khalti payment
 const initiateKhaltiPayment = async (req, res) => {
@@ -40,7 +41,7 @@ const initiateKhaltiPayment = async (req, res) => {
           Authorization: `Key ${process.env.KHALTI_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     const transaction = new transactionModel({
@@ -92,7 +93,7 @@ const verifyKhaltiPayment = async (req, res) => {
           Authorization: `Key ${process.env.KHALTI_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     const { status, transaction_id, total_amount } = response.data;
@@ -175,7 +176,7 @@ const verifyKhaltiPayment = async (req, res) => {
   } catch (error) {
     console.error(
       "Khalti Verify Error:",
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
 
     let errorMessage = "Payment verification failed";

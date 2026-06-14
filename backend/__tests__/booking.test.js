@@ -69,7 +69,7 @@ describe("Booking Logic Tests (Race Conditions)", () => {
       expect.objectContaining({
         $push: { [`slots_booked.${futureSlotDate}`]: "10:00 AM" },
       }),
-      { new: true }
+      { new: true },
     );
 
     expect(mockRes.status).toHaveBeenCalledWith(409);

@@ -13,7 +13,7 @@ const Rankings = () => {
     try {
       const { data } = await axios.get(
         backendURL + "/api/admin/all-doctor-performance",
-        { headers: { Authorization: `Bearer ${aToken}` } }
+        { headers: { Authorization: `Bearer ${aToken}` } },
       );
       if (data.success) {
         setRankings(data.data);
@@ -35,9 +35,12 @@ const Rankings = () => {
   }, [aToken]);
 
   const getRankStyles = (index) => {
-    if (index === 0) return { color: "text-yellow-500", bg: "bg-yellow-50", badge: "Gold" };
-    if (index === 1) return { color: "text-gray-400", bg: "bg-gray-50", badge: "Silver" };
-    if (index === 2) return { color: "text-amber-600", bg: "bg-amber-50", badge: "Bronze" };
+    if (index === 0)
+      return { color: "text-yellow-500", bg: "bg-yellow-50", badge: "Gold" };
+    if (index === 1)
+      return { color: "text-gray-400", bg: "bg-gray-50", badge: "Silver" };
+    if (index === 2)
+      return { color: "text-amber-600", bg: "bg-amber-50", badge: "Bronze" };
     return { color: "text-gray-500", bg: "bg-white", badge: `#${index + 1}` };
   };
 
@@ -58,7 +61,8 @@ const Rankings = () => {
           <span className="text-primary">Rankings</span>
         </h2>
         <p className="text-gray-600">
-          Performance scores based on appointments, revenue, and patient ratings.
+          Performance scores based on appointments, revenue, and patient
+          ratings.
         </p>
       </div>
 
@@ -77,18 +81,28 @@ const Rankings = () => {
                     alt={doc.doctor.name}
                     className="w-24 h-24 rounded-full object-cover shadow-sm border-4 border-white"
                   />
-                  <div className={`absolute -bottom-3 left-1/2 transform -translate-x-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-md ${styles.color}`}>
+                  <div
+                    className={`absolute -bottom-3 left-1/2 transform -translate-x-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-md ${styles.color}`}
+                  >
                     <Medal size={20} />
                   </div>
                 </div>
-                
-                <h3 className="text-lg font-bold text-gray-800">Dr. {doc.doctor.name}</h3>
-                <p className="text-sm text-gray-500 mb-4">{doc.doctor.speciality}</p>
-                
+
+                <h3 className="text-lg font-bold text-gray-800">
+                  Dr. {doc.doctor.name}
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  {doc.doctor.speciality}
+                </p>
+
                 <div className="w-full mb-4">
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="font-medium text-gray-700">Composite Score</span>
-                    <span className="font-bold text-primary">{doc.scores.totalScore}/100</span>
+                    <span className="font-medium text-gray-700">
+                      Composite Score
+                    </span>
+                    <span className="font-bold text-primary">
+                      {doc.scores.totalScore}/100
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
@@ -101,15 +115,21 @@ const Rankings = () => {
                 <div className="grid grid-cols-3 gap-2 w-full pt-4 border-t border-gray-200/60">
                   <div className="flex flex-col items-center">
                     <Users size={16} className="text-blue-500 mb-1" />
-                    <span className="text-xs font-semibold">{doc.completedAppointments}</span>
+                    <span className="text-xs font-semibold">
+                      {doc.completedAppointments}
+                    </span>
                   </div>
                   <div className="flex flex-col items-center border-l border-r border-gray-200/60">
                     <TrendingUp size={16} className="text-green-500 mb-1" />
-                    <span className="text-xs font-semibold">${doc.revenue}</span>
+                    <span className="text-xs font-semibold">
+                      ${doc.revenue}
+                    </span>
                   </div>
                   <div className="flex flex-col items-center">
                     <Star size={16} className="text-amber-400 mb-1" />
-                    <span className="text-xs font-semibold">{doc.averageRating.toFixed(1)}</span>
+                    <span className="text-xs font-semibold">
+                      {doc.averageRating.toFixed(1)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -120,7 +140,9 @@ const Rankings = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-5 border-b border-gray-100">
-          <h3 className="text-lg font-bold text-gray-800">Complete Leaderboard</h3>
+          <h3 className="text-lg font-bold text-gray-800">
+            Complete Leaderboard
+          </h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
@@ -136,22 +158,39 @@ const Rankings = () => {
             </thead>
             <tbody>
               {rankings.map((doc, index) => (
-                <tr key={doc.doctorId} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-gray-500">#{index + 1}</td>
+                <tr
+                  key={doc.doctorId}
+                  className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-6 py-4 font-semibold text-gray-500">
+                    #{index + 1}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <img src={doc.doctor.image} alt="" className="w-10 h-10 rounded-full object-cover" />
-                      <span className="font-medium text-gray-800">Dr. {doc.doctor.name}</span>
+                      <img
+                        src={doc.doctor.image}
+                        alt=""
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <span className="font-medium text-gray-800">
+                        Dr. {doc.doctor.name}
+                      </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-600">{doc.doctor.speciality}</td>
+                  <td className="px-6 py-4 text-gray-600">
+                    {doc.doctor.speciality}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1 text-amber-500">
                       <Star size={14} className="fill-current" />
-                      <span className="font-medium">{doc.averageRating.toFixed(1)}</span>
+                      <span className="font-medium">
+                        {doc.averageRating.toFixed(1)}
+                      </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-600">{doc.completedAppointments}</td>
+                  <td className="px-6 py-4 text-gray-600">
+                    {doc.completedAppointments}
+                  </td>
                   <td className="px-6 py-4 text-right">
                     <span className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-primary/10 text-primary font-bold">
                       {doc.scores.totalScore}

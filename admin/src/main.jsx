@@ -18,5 +18,5 @@ createRoot(document.getElementById("root")).render(
         </DoctorContextProvider>
       </AdminContextProvider>
     </BrowserRouter>
-  </StrictMode>
+  </StrictMode>,
 );

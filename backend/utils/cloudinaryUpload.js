@@ -11,7 +11,7 @@ export const uploadImageBuffer = (buffer, folder) =>
         }
 
         resolve(result);
-      }
+      },
     );
 
     stream.end(buffer);
@@ -21,7 +21,7 @@ export const uploadImagePath = async (filePath, folder) => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
       resource_type: "image",
-      folder: folder
+      folder: folder,
     });
     return result;
   } catch (error) {

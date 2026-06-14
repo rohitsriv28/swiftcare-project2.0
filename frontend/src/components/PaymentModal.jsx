@@ -66,7 +66,7 @@ const PaymentModal = ({
             amount,
             user: userData,
           },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
         if (response.data.success && response.data.payment_url) {
@@ -78,7 +78,7 @@ const PaymentModal = ({
               pidx: response.data.pidx,
               amount,
               timestamp: Date.now(),
-            })
+            }),
           );
 
           window.location.href = response.data.payment_url;
@@ -88,7 +88,7 @@ const PaymentModal = ({
         response = await axios.post(
           `${backendUrl}/api/user/pay-with-razorpay`,
           { appointmentId },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
         if (response.data.success && response.data.order) {
@@ -108,7 +108,7 @@ const PaymentModal = ({
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_signature: response.razorpay_signature,
                   },
-                  { headers: { Authorization: `Bearer ${token}` } }
+                  { headers: { Authorization: `Bearer ${token}` } },
                 );
 
                 if (verifyResponse.data.success) {

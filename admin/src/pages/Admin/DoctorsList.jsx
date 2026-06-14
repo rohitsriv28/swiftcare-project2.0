@@ -92,19 +92,21 @@ const DoctorsList = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setViewMode("grid")}
-              className={`px-4 py-2 rounded-md transition duration-150 ${viewMode === "grid"
+              className={`px-4 py-2 rounded-md transition duration-150 ${
+                viewMode === "grid"
                   ? "bg-indigo-600 text-white shadow-md"
                   : "bg-gray-100 hover:bg-gray-200"
-                }`}
+              }`}
             >
               Grid
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`px-4 py-2 rounded-md transition duration-150 ${viewMode === "list"
+              className={`px-4 py-2 rounded-md transition duration-150 ${
+                viewMode === "list"
                   ? "bg-indigo-600 text-white shadow-md"
                   : "bg-gray-100 hover:bg-gray-200"
-                }`}
+              }`}
             >
               List
             </button>
@@ -151,10 +153,11 @@ const DoctorsList = () => {
                   }}
                 />
                 <span
-                  className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${doctor.availability
+                  className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${
+                    doctor.availability
                       ? "bg-green-100 text-green-800"
                       : "bg-red-100 text-red-800"
-                    }`}
+                  }`}
                 >
                   {doctor.availability ? "Available" : "Unavailable"}
                 </span>
@@ -220,8 +223,9 @@ const DoctorsList = () => {
                 {sortedDoctors.map((doctor, index) => (
                   <tr
                     key={doctor._id}
-                    className={`hover:bg-gray-50 transition duration-150 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                      }`}
+                    className={`hover:bg-gray-50 transition duration-150 ${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    }`}
                   >
                     <td className="px-4 py-4">
                       <div className="flex items-center">
@@ -277,10 +281,11 @@ const DoctorsList = () => {
                           uncheckedIcon={false}
                         />
                         <span
-                          className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${doctor.availability
+                          className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${
+                            doctor.availability
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
-                            }`}
+                          }`}
                         >
                           {doctor.availability ? "Available" : "Unavailable"}
                         </span>

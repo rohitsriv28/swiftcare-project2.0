@@ -38,7 +38,7 @@ const MyProfile = () => {
       formData.append("phone", userData.phone || "");
       formData.append(
         "address",
-        JSON.stringify(userData.address || { line1: "", line2: "" })
+        JSON.stringify(userData.address || { line1: "", line2: "" }),
       );
       formData.append("gender", userData.gender || "Not Selected");
       formData.append("dob", userData.dob || "Not Selected");
@@ -48,7 +48,7 @@ const MyProfile = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/update-profile",
         formData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (data.success) {
@@ -334,7 +334,9 @@ const MyProfile = () => {
                 {isEdit ? (
                   <input
                     type="date"
-                    value={userData.dob === "Not Selected" ? "" : userData.dob || ""}
+                    value={
+                      userData.dob === "Not Selected" ? "" : userData.dob || ""
+                    }
                     onChange={(e) =>
                       setUserData((prev) => ({
                         ...prev,

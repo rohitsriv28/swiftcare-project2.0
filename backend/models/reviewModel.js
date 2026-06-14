@@ -32,7 +32,7 @@ const reviewSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { minimize: false }
+  { minimize: false },
 );
 
 // Enforce one review per completed appointment per user

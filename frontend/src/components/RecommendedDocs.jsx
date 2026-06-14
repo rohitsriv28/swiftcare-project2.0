@@ -17,12 +17,15 @@ const RecommendedDocs = () => {
         setLoading(false);
         return;
       }
-      
+
       try {
-        const { data } = await axios.get(backendUrl + "/api/user/recommendations", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
+        const { data } = await axios.get(
+          backendUrl + "/api/user/recommendations",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+
         if (data.success) {
           setDoctors(data.data.slice(0, 5)); // Show top 5
         }
@@ -51,15 +54,18 @@ const RecommendedDocs = () => {
           Recommended For You
         </h2>
         <p className="text-gray-600 sm:w-1/2 text-sm">
-          Based on your preferences, these specialists rank highly in rating, availability, and affordability.
+          Based on your preferences, these specialists rank highly in rating,
+          availability, and affordability.
         </p>
       </div>
 
       <div className="w-full relative">
-        <div className="flex overflow-x-auto gap-6 pb-6 pt-2 snap-x hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          
+        <div
+          className="flex overflow-x-auto gap-6 pb-6 pt-2 snap-x hide-scrollbar"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
           {/* Top Match Card */}
-          <div 
+          <div
             onClick={() => {
               navigate(`/appointment/${topMatch._id}`);
               window.scrollTo(0, 0);
@@ -67,26 +73,40 @@ const RecommendedDocs = () => {
             className="flex-shrink-0 w-80 md:w-96 rounded-2xl overflow-hidden border-2 border-yellow-400 bg-gradient-to-br from-yellow-50 to-white shadow-lg cursor-pointer transform hover:-translate-y-2 transition-all duration-300 snap-center relative"
           >
             <div className="absolute top-0 left-0 w-full bg-yellow-400 text-yellow-900 text-xs font-bold py-1.5 px-4 flex justify-between items-center z-10 shadow-sm">
-              <span className="flex items-center gap-1"><Award size={14}/> TOP MATCH</span>
+              <span className="flex items-center gap-1">
+                <Award size={14} /> TOP MATCH
+              </span>
               <span>Score: {topMatch.recommendationScore.toFixed(1)}</span>
             </div>
-            
+
             <div className="pt-10 p-5 flex flex-col gap-4">
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <img src={topMatch.image} alt="" className="w-20 h-20 rounded-full border-2 border-white shadow-md object-cover bg-blue-50" />
+                  <img
+                    src={topMatch.image}
+                    alt=""
+                    className="w-20 h-20 rounded-full border-2 border-white shadow-md object-cover bg-blue-50"
+                  />
                   <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">Dr. {topMatch.name}</h3>
-                  <p className="text-primary font-medium">{topMatch.speciality}</p>
+                  <h3 className="text-xl font-bold text-gray-800">
+                    Dr. {topMatch.name}
+                  </h3>
+                  <p className="text-primary font-medium">
+                    {topMatch.speciality}
+                  </p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-y-2 mt-2">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Star size={16} className="text-yellow-500 fill-current" />
-                  <span className="font-medium">{topMatch.averageRating ? topMatch.averageRating.toFixed(1) : "New"}</span>
+                  <span className="font-medium">
+                    {topMatch.averageRating
+                      ? topMatch.averageRating.toFixed(1)
+                      : "New"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Award size={16} className="text-gray-400" />
@@ -97,7 +117,9 @@ const RecommendedDocs = () => {
                   <span>Highly Available</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
-                  <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full">${topMatch.fee}</span>
+                  <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    ${topMatch.fee}
+                  </span>
                 </div>
               </div>
             </div>
@@ -105,7 +127,7 @@ const RecommendedDocs = () => {
 
           {/* Other Matches */}
           {otherMatches.map((doc, index) => (
-            <div 
+            <div
               key={doc._id}
               onClick={() => {
                 navigate(`/appointment/${doc._id}`);
@@ -116,27 +138,36 @@ const RecommendedDocs = () => {
               <div className="absolute top-0 right-0 bg-primary/10 text-primary text-xs font-semibold py-1 px-3 rounded-bl-lg">
                 Match #{index + 2}
               </div>
-              
+
               <div className="p-5 flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <img src={doc.image} alt="" className="w-16 h-16 rounded-full border border-gray-100 object-cover bg-blue-50" />
+                  <img
+                    src={doc.image}
+                    alt=""
+                    className="w-16 h-16 rounded-full border border-gray-100 object-cover bg-blue-50"
+                  />
                   <div>
-                    <h3 className="text-lg font-bold text-gray-800 line-clamp-1">Dr. {doc.name}</h3>
+                    <h3 className="text-lg font-bold text-gray-800 line-clamp-1">
+                      Dr. {doc.name}
+                    </h3>
                     <p className="text-sm text-primary">{doc.speciality}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between items-center mt-2 pt-3 border-t border-gray-50">
                   <div className="flex items-center gap-1 text-sm">
                     <Star size={14} className="text-yellow-500 fill-current" />
-                    <span className="font-medium">{doc.averageRating ? doc.averageRating.toFixed(1) : "N/A"}</span>
+                    <span className="font-medium">
+                      {doc.averageRating ? doc.averageRating.toFixed(1) : "N/A"}
+                    </span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-700">${doc.fee}</span>
+                  <span className="text-sm font-semibold text-gray-700">
+                    ${doc.fee}
+                  </span>
                 </div>
               </div>
             </div>
           ))}
-
         </div>
       </div>
     </div>

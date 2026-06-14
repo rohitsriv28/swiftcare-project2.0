@@ -4,7 +4,7 @@ The SwiftCare Backend Service powers the Patient and Admin portals. It is a robu
 
 ## 🚀 Recent Updates & Architectural Improvements
 
-- **Comprehensive Security Overhaul**: 
+- **Comprehensive Security Overhaul**:
   - Added strict API rate limiting (`rateLimiter.js`) to prevent brute-force attacks and abuse.
   - Implemented robust request validation using `express-validator` across Admin, Doctor, and User routes.
   - Fixed timing-based email enumeration vulnerabilities in authentication controllers.
@@ -22,6 +22,7 @@ The SwiftCare Backend Service powers the Patient and Admin portals. It is a robu
   - Updated backend routes to strictly enforce correct HTTP methods (`GET` vs `POST` for profile fetching).
 
 ## 🛠️ Tech Stack
+
 - Node.js & Express
 - MongoDB & Mongoose
 - JSON Web Tokens (JWT) & Bcrypt

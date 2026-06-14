@@ -10,7 +10,7 @@ const connectCloudinary = () => {
 
   if (missingEnvVars.length > 0) {
     throw new Error(
-      `Missing required Cloudinary environment variables: ${missingEnvVars.join(", ")}`
+      `Missing required Cloudinary environment variables: ${missingEnvVars.join(", ")}`,
     );
   }
 

@@ -2,7 +2,15 @@ import React, { useContext } from "react";
 import { AdminContext } from "../context/AdminContext";
 import { NavLink } from "react-router-dom";
 import { DoctorContext } from "../context/DoctorContext";
-import { Home, Calendar, UserPlus, Users, User, Trophy, BarChart } from "lucide-react";
+import {
+  Home,
+  Calendar,
+  UserPlus,
+  Users,
+  User,
+  Trophy,
+  BarChart,
+} from "lucide-react";
 
 const Sidebar = () => {
   const { aToken } = useContext(AdminContext);
@@ -13,9 +21,10 @@ const Sidebar = () => {
       to={to}
       className={({ isActive }) =>
         `flex items-center gap-3 py-3 px-4 md:px-6 transition-colors duration-200 border-r-0 md:rounded-r-lg mr-4 mb-1
-        ${isActive
-          ? "bg-[#F2F3FF] text-primary border-l-4 border-primary font-medium"
-          : "border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4"
+        ${
+          isActive
+            ? "bg-[#F2F3FF] text-primary border-l-4 border-primary font-medium"
+            : "border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4"
         }`
       }
     >
@@ -82,18 +91,6 @@ const Sidebar = () => {
           />
         </div>
       )}
-
-      {/* <div className="absolute bottom-8 left-0 right-0 px-4">
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h3 className="font-medium text-primary text-sm mb-1">
-            MediCare Pro
-          </h3>
-          <p className="text-xs text-gray-600 mb-3">Access premium features</p>
-          <button className="bg-primary hover:bg-primary/90 text-white text-xs px-4 py-2 rounded-md w-full transition-colors">
-            Upgrade Now
-          </button>
-        </div>
-      </div> */}
     </div>
   );
 };

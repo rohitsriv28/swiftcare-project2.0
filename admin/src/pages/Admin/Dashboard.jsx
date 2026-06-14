@@ -193,7 +193,7 @@ const Dashboard = () => {
                   dataKey="displayDate"
                   tick={{ fontSize: 12 }}
                   interval={Math.floor(
-                    dashboardData.appointmentsByDay.length / 10
+                    dashboardData.appointmentsByDay.length / 10,
                   )}
                 />
                 <YAxis allowDecimals={false} />
@@ -232,7 +232,7 @@ const Dashboard = () => {
                   dataKey="displayDate"
                   tick={{ fontSize: 12 }}
                   interval={Math.floor(
-                    dashboardData.appointmentsByDay.length / 10
+                    dashboardData.appointmentsByDay.length / 10,
                   )}
                 />
                 <YAxis />

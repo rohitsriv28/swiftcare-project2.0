@@ -35,16 +35,43 @@ const App = () => {
             }
           />
           {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={aToken ? <Dashboard /> : <Navigate to="/" />} />
-          <Route path="/all-appointments" element={aToken ? <AllAppointments /> : <Navigate to="/" />} />
-          <Route path="/add-doctor" element={aToken ? <AddDoctor /> : <Navigate to="/" />} />
-          <Route path="/all-doctors" element={aToken ? <DoctorsList /> : <Navigate to="/" />} />
-          <Route path="/rankings" element={aToken ? <Rankings /> : <Navigate to="/" />} />
-          <Route path="/analytics" element={aToken ? <Analytics /> : <Navigate to="/" />} />
+          <Route
+            path="/admin/dashboard"
+            element={aToken ? <Dashboard /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/all-appointments"
+            element={aToken ? <AllAppointments /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/add-doctor"
+            element={aToken ? <AddDoctor /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/all-doctors"
+            element={aToken ? <DoctorsList /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/rankings"
+            element={aToken ? <Rankings /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/analytics"
+            element={aToken ? <Analytics /> : <Navigate to="/" />}
+          />
           {/* Doctor Routes */}
-          <Route path="/doctor/appointments" element={dToken ? <DoctorAppointment /> : <Navigate to="/" />} />
-          <Route path="/doctor/dashboard" element={dToken ? <DoctorDashboard /> : <Navigate to="/" />} />
-          <Route path="/doctor/profile" element={dToken ? <DoctorProfile /> : <Navigate to="/" />} />
+          <Route
+            path="/doctor/appointments"
+            element={dToken ? <DoctorAppointment /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/doctor/dashboard"
+            element={dToken ? <DoctorDashboard /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/doctor/profile"
+            element={dToken ? <DoctorProfile /> : <Navigate to="/" />}
+          />
         </Routes>
       </div>
     </div>

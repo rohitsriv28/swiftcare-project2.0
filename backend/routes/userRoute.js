@@ -32,13 +32,25 @@ import {
   razorpayValidation,
   verifyRazorpayValidation,
   khaltiValidation,
-  verifyKhaltiValidation
+  verifyKhaltiValidation,
 } from "../validators/userValidator.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/register", authLimiter, registerValidation, validateRequests, registerUser);
-userRouter.post("/login", authLimiter, userLoginValidation, validateRequests, userLogin);
+userRouter.post(
+  "/register",
+  authLimiter,
+  registerValidation,
+  validateRequests,
+  registerUser,
+);
+userRouter.post(
+  "/login",
+  authLimiter,
+  userLoginValidation,
+  validateRequests,
+  userLogin,
+);
 userRouter.get("/get-profile", authUser, getProfile);
 userRouter.post(
   "/update-profile",
@@ -46,17 +58,53 @@ userRouter.post(
   upload.single("image"),
   updateProfileValidation,
   validateRequests,
-  updateProfile
+  updateProfile,
 );
 userRouter.post("/search-doctors", searchDoctors);
-userRouter.post("/book-appointment", authUser, bookingValidation, validateRequests, bookAppointment);
+userRouter.post(
+  "/book-appointment",
+  authUser,
+  bookingValidation,
+  validateRequests,
+  bookAppointment,
+);
 userRouter.get("/appointments", authUser, listAppointments);
-userRouter.post("/cancel-appointment", authUser, userAppointmentCancelValidation, validateRequests, cancelAppointment);
+userRouter.post(
+  "/cancel-appointment",
+  authUser,
+  userAppointmentCancelValidation,
+  validateRequests,
+  cancelAppointment,
+);
 // Payment routes
-userRouter.post("/pay-with-khalti", authUser, khaltiValidation, validateRequests, initiateKhaltiPayment);
-userRouter.post("/verify-khalti", authUser, verifyKhaltiValidation, validateRequests, verifyKhaltiPayment);
-userRouter.post("/pay-with-razorpay", authUser, razorpayValidation, validateRequests, payWithRazorpay);
-userRouter.post("/verify-razorpay", authUser, verifyRazorpayValidation, validateRequests, verifyRazorpayPayment);
+userRouter.post(
+  "/pay-with-khalti",
+  authUser,
+  khaltiValidation,
+  validateRequests,
+  initiateKhaltiPayment,
+);
+userRouter.post(
+  "/verify-khalti",
+  authUser,
+  verifyKhaltiValidation,
+  validateRequests,
+  verifyKhaltiPayment,
+);
+userRouter.post(
+  "/pay-with-razorpay",
+  authUser,
+  razorpayValidation,
+  validateRequests,
+  payWithRazorpay,
+);
+userRouter.post(
+  "/verify-razorpay",
+  authUser,
+  verifyRazorpayValidation,
+  validateRequests,
+  verifyRazorpayPayment,
+);
 
 // Review routes
 userRouter.post("/add-review", authUser, addReview);
