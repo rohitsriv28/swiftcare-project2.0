@@ -1,17 +1,20 @@
 import jwt from "jsonwebtoken";
+import { getBearerToken } from "./getBearerToken.js";
 
 // doctor authentication middleware
 const authDoctor = async (req, res, next) => {
-    
   try {
-    const authHeader = req.headers["authorization"];
-    const dToken = authHeader && authHeader.split(" ")[1]; // Extract token from "Bearer <token>"
+    const dToken = getBearerToken(req);
+
     if (!dToken) {
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized access!" });
     }
     const decodedToken = jwt.verify(dToken, process.env.JWT_SECRET);
+    req.doctor = decodedToken;
+    req.docId = decodedToken.id;
+    if (!req.body) req.body = {};
     req.body.docId = decodedToken.id;
     next();
   } catch (error) {
@@ -27,8 +30,8 @@ const authDoctor = async (req, res, next) => {
         message: "Invalid token. Please login again.",
       });
     }
-    console.log("Error:", error);
-    res.status(500).json({
+    console.error("Doctor auth error:", error);
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
     });

@@ -1,14 +1,25 @@
 import React, { useContext } from "react";
 import { AdminContext } from "../context/AdminContext";
+import { DoctorContext } from "../context/DoctorContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { LogOut, ShieldCheck, User } from "lucide-react";
 
 const Navbar = () => {
-  const { aToken, logout } = useContext(AdminContext);
+  const { aToken, setAToken } = useContext(AdminContext);
+  const { dToken, setDToken } = useContext(DoctorContext);
   const navigate = useNavigate();
+  
   const handleLogout = () => {
-    logout();
+    if (aToken) {
+      localStorage.removeItem("aToken");
+      setAToken("");
+    }
+    if (dToken) {
+      localStorage.removeItem("dToken");
+      localStorage.removeItem("doctorInfo");
+      setDToken("");
+    }
     toast.success("Logged out successfully");
     navigate("/");
   };

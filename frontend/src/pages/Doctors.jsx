@@ -26,7 +26,7 @@ const Doctors = () => {
   const { speciality } = useParams();
   const [filterDoc, setFilterDoc] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
-  const { doctors } = useContext(AppContext);
+  const { doctors, loadMoreDoctors, hasMoreDoctors } = useContext(AppContext);
   const navigate = useNavigate();
 
   const specialties = [
@@ -276,6 +276,18 @@ const Doctors = () => {
                 className="mt-4 bg-primary/10 text-primary px-4 py-2 rounded-md text-sm font-medium hover:bg-primary hover:text-white transition-all duration-300"
               >
                 View All Doctors
+              </button>
+            </div>
+          )}
+
+          {/* Load More Button */}
+          {hasMoreDoctors && (!speciality) && filterDoc.length > 0 && (
+            <div className="mt-8 flex justify-center">
+              <button
+                onClick={loadMoreDoctors}
+                className="bg-white text-gray-600 border border-gray-300 px-6 py-2 rounded-full font-medium hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm"
+              >
+                Load More Doctors
               </button>
             </div>
           )}

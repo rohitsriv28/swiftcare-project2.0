@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
+import { getBearerToken } from "./getBearerToken.js";
 
 // admin authentication middleware
 const authAdmin = async (req, res, next) => {
   try {
-    const authHeader = req.headers["authorization"];
-    const atoken = (authHeader && authHeader.split(" ")[1]) || req.headers["atoken"];
-    
+    const atoken = getBearerToken(req);
+
     if (!atoken) {
       return res
         .status(401)
@@ -17,6 +17,7 @@ const authAdmin = async (req, res, next) => {
         .status(401)
         .json({ success: false, message: "Unauthorized access" });
     }
+    req.admin = decodedToken;
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
@@ -31,8 +32,8 @@ const authAdmin = async (req, res, next) => {
         message: "Invalid token. Please login again.",
       });
     }
-    console.log("Error:", error);
-    res.status(500).json({
+    console.error("Admin auth error:", error);
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
     });

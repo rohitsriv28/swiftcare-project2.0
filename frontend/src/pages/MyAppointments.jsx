@@ -14,6 +14,8 @@ import {
   CheckCircle,
   Loader2,
   AlertTriangle,
+  Star,
+  MessageSquare,
 } from "lucide-react";
 
 const MyAppointments = () => {
@@ -25,6 +27,19 @@ const MyAppointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
   const [processingPaymentId, setProcessingPaymentId] = useState(null);
+  
+  // Cursor pagination state
+  const [appointmentsCursor, setAppointmentsCursor] = useState(null);
+  const [hasMoreAppointments, setHasMoreAppointments] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  
+  // Review state
+  const [activeReviewId, setActiveReviewId] = useState(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   const navigate = useNavigate();
 
   const months = [
@@ -53,12 +68,15 @@ const MyAppointments = () => {
   const getUserAppointments = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(backendUrl + "/api/user/appointments", {
-        headers: { token },
+      const { data } = await axios.get(backendUrl + "/api/user/appointments?limit=10", {
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (data.success) {
-        setAppointments(data.appointments.reverse());
-        console.log(data.appointments);
+        setAppointments(data.appointments);
+        if (data.pagination) {
+          setAppointmentsCursor(data.pagination.nextCursor);
+          setHasMoreAppointments(data.pagination.hasNextPage);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -68,13 +86,35 @@ const MyAppointments = () => {
     }
   };
 
+  const loadMoreAppointments = async () => {
+    if (!hasMoreAppointments || !appointmentsCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/user/appointments?limit=10&cursor=${appointmentsCursor}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        setAppointments(prev => [...prev, ...data.appointments]);
+        if (data.pagination) {
+          setAppointmentsCursor(data.pagination.nextCursor);
+          setHasMoreAppointments(data.pagination.hasNextPage);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   const cancelAppointment = async (appointmentId) => {
     setCancellingId(appointmentId);
     try {
       const { data } = await axios.post(
         backendUrl + "/api/user/cancel-appointment",
         { appointmentId },
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (data.success) {
         toast.success(data.message);
@@ -88,6 +128,45 @@ const MyAppointments = () => {
       toast.error(error.message || "Failed to cancel appointment");
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const submitReview = async (appointmentId) => {
+    if (reviewRating === 0) {
+      toast.error("Please select a rating");
+      return;
+    }
+    
+    setSubmittingReview(true);
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/user/add-review",
+        {
+          appointmentId,
+          rating: reviewRating,
+          comment: reviewComment,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        // Optimistically update the UI
+        setAppointments((prev) =>
+          prev.map((app) =>
+            app._id === appointmentId ? { ...app, hasReviewed: true } : app
+          )
+        );
+        setActiveReviewId(null);
+        setReviewRating(0);
+        setReviewComment("");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to submit review");
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -107,7 +186,7 @@ const MyAppointments = () => {
           const { data } = await axios.post(
             backendUrl + "/api/user/verify-razorpay",
             response,
-            { headers: { token } }
+            { headers: { Authorization: `Bearer ${token}` } }
           );
           if (data.success) {
             toast.success("Payment successful!");
@@ -132,7 +211,7 @@ const MyAppointments = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/pay-with-razorpay",
         { appointmentId },
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (data.success) {
         console.log(data.order);
@@ -438,6 +517,95 @@ const MyAppointments = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Review Section */}
+                {!item.hasReviewed && (
+                  <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+                    {activeReviewId !== item._id ? (
+                      <button
+                        onClick={() => {
+                          setActiveReviewId(item._id);
+                          setReviewRating(0);
+                          setReviewComment("");
+                        }}
+                        className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-dark transition-colors"
+                      >
+                        <Star size={16} />
+                        Write a Review
+                      </button>
+                    ) : (
+                      <div className="w-full bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h5 className="text-sm font-medium text-gray-800 mb-3 flex items-center gap-2">
+                          <Star size={16} className="text-amber-500" />
+                          Rate your experience with Dr. {item.docData.name}
+                        </h5>
+                        
+                        <div className="flex gap-1 mb-4">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setReviewRating(star)}
+                              onMouseEnter={() => setHoverRating(star)}
+                              onMouseLeave={() => setHoverRating(0)}
+                              className="focus:outline-none transition-colors duration-200"
+                            >
+                              <Star
+                                size={24}
+                                className={
+                                  (hoverRating || reviewRating) >= star
+                                    ? "fill-amber-500 text-amber-500"
+                                    : "text-gray-300"
+                                }
+                              />
+                            </button>
+                          ))}
+                        </div>
+                        
+                        <div className="relative mb-4">
+                          <div className="absolute top-3 left-3 flex items-start pointer-events-none">
+                            <MessageSquare className="h-4 w-4 text-gray-400" />
+                          </div>
+                          <textarea
+                            placeholder="Share your experience (optional)"
+                            value={reviewComment}
+                            onChange={(e) => setReviewComment(e.target.value)}
+                            maxLength={500}
+                            className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent resize-none"
+                            rows={3}
+                          />
+                          <p className="text-right text-xs text-gray-500 mt-1">
+                            {reviewComment.length}/500
+                          </p>
+                        </div>
+                        
+                        <div className="flex justify-end gap-3">
+                          <button
+                            onClick={() => setActiveReviewId(null)}
+                            disabled={submittingReview}
+                            className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => submitReview(item._id)}
+                            disabled={submittingReview || reviewRating === 0}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {submittingReview ? (
+                              <>
+                                <Loader2 size={14} className="animate-spin" />
+                                Submitting...
+                              </>
+                            ) : (
+                              "Submit Review"
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -451,7 +619,7 @@ const MyAppointments = () => {
             <XCircle size={18} className="text-red-500" />
             Cancelled Appointments
           </h3>
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 opacity-75">
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 opacity-70">
             {cancelled.map((item, index) => (
               <div
                 key={index}
@@ -518,6 +686,19 @@ const MyAppointments = () => {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Load More Button */}
+      {hasMoreAppointments && (
+        <div className="flex justify-center mt-8 mb-12">
+          <button
+            onClick={loadMoreAppointments}
+            disabled={loadingMore}
+            className="flex items-center gap-2 px-6 py-2.5 bg-white text-gray-700 font-medium rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 hover:text-primary transition-all disabled:opacity-50"
+          >
+            {loadingMore ? "Loading..." : "Load More Appointments"}
+          </button>
         </div>
       )}
 

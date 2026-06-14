@@ -8,6 +8,7 @@ import {
   markAppointmentCancelled,
   markAppointmentCompleted,
   updateDoctorProfile,
+  getDoctorProfilePublic,
 } from "../controllers/doctorController.js";
 import authDoctor from "../middleware/authDoctor.js";
 import multer from "multer";
@@ -24,6 +25,7 @@ const doctorRouter = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024 } }); // Centralizing memory limits on doctor route exclusively
 
 doctorRouter.get("/list", doctorList);
+doctorRouter.get("/profile/:docId", getDoctorProfilePublic);
 doctorRouter.post("/login", authLimiter, doctorLoginValidation, validateRequests, doctorLogin);
 doctorRouter.get("/doctor-appointments", authDoctor, doctorAppointments);
 doctorRouter.post(
@@ -35,7 +37,7 @@ doctorRouter.post(
 );
 doctorRouter.post("/cancel-appointment", authDoctor, doctorAppointmentValidation, validateRequests, markAppointmentCancelled);
 doctorRouter.get("/dashboard", authDoctor, doctorDashboardData);
-doctorRouter.post("/profile", authDoctor, doctorProfile);
+doctorRouter.get("/profile", authDoctor, doctorProfile);
 doctorRouter.post(
   "/update-profile",
   authDoctor,

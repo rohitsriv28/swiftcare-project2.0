@@ -4,7 +4,7 @@ import { ToastContainer } from "react-toastify";
 import { AdminContext } from "./context/AdminContext";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Admin/Dashboard";
 import AllAppointments from "./pages/Admin/AllAppointments";
 import AddDoctor from "./pages/Admin/AddDoctor";
@@ -13,6 +13,8 @@ import { DoctorContext } from "./context/DoctorContext";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
 import DoctorProfile from "./pages/Doctor/DoctorProfile";
 import DoctorAppointment from "./pages/Doctor/DoctorAppointment";
+import Rankings from "./pages/Admin/Rankings";
+import Analytics from "./pages/Admin/Analytics";
 
 const App = () => {
   const { aToken } = useContext(AdminContext);
@@ -33,14 +35,16 @@ const App = () => {
             }
           />
           {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/all-appointments" element={<AllAppointments />} />
-          <Route path="/add-doctor" element={<AddDoctor />} />
-          <Route path="/all-doctors" element={<DoctorsList />} />
+          <Route path="/admin/dashboard" element={aToken ? <Dashboard /> : <Navigate to="/" />} />
+          <Route path="/all-appointments" element={aToken ? <AllAppointments /> : <Navigate to="/" />} />
+          <Route path="/add-doctor" element={aToken ? <AddDoctor /> : <Navigate to="/" />} />
+          <Route path="/all-doctors" element={aToken ? <DoctorsList /> : <Navigate to="/" />} />
+          <Route path="/rankings" element={aToken ? <Rankings /> : <Navigate to="/" />} />
+          <Route path="/analytics" element={aToken ? <Analytics /> : <Navigate to="/" />} />
           {/* Doctor Routes */}
-          <Route path="/doctor/appointments" element={<DoctorAppointment />} />
-          <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-          <Route path="/doctor/profile" element={<DoctorProfile />} />
+          <Route path="/doctor/appointments" element={dToken ? <DoctorAppointment /> : <Navigate to="/" />} />
+          <Route path="/doctor/dashboard" element={dToken ? <DoctorDashboard /> : <Navigate to="/" />} />
+          <Route path="/doctor/profile" element={dToken ? <DoctorProfile /> : <Navigate to="/" />} />
         </Routes>
       </div>
     </div>

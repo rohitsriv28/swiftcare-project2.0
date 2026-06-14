@@ -33,7 +33,7 @@ const Navbar = () => {
 
   const logout = () => {
     setToken(false);
-    localStorage.clear();
+    localStorage.removeItem("token");
   };
 
   // Handle clicks outside of dropdown and search results
@@ -80,7 +80,7 @@ const Navbar = () => {
       const response = await axios.post(
         `${backendUrl}/api/user/search-doctors`,
         { query: searchQuery },
-        { headers: token ? { token } : {} }
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
 
       if (response.data.success) {

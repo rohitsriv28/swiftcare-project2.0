@@ -1,14 +1,19 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import Fuse from "fuse.js";
-import { pruneDoctorSlots } from "../utils/slotScheduler.js";
+import { TOKEN_EXPIRY } from "../config/constants.js";
+import { uploadImageBuffer } from "../utils/cloudinaryUpload.js";
 
 const changeAvailability = async (req, res) => {
   try {
     const { docId } = req.body;
     const docData = await doctorModel.findById(docId);
+    if (!docData) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+    }
     await doctorModel.findByIdAndUpdate(docId, {
       availability: !docData.availability,
     });
@@ -17,7 +22,6 @@ const changeAvailability = async (req, res) => {
       message: "Availability changed successfully",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -27,35 +31,63 @@ const changeAvailability = async (req, res) => {
 
 const doctorList = async (req, res) => {
   try {
-    const doctors = await doctorModel.find({}).select(["-password", "-email"]);
+    const { cursor, limit = 10 } = req.query;
+    const limitNum = parseInt(limit, 10) || 10;
     
-    // Pruning natively preventing history bloat 
-    for (let doc of doctors) {
-      await pruneDoctorSlots(doc);
+    // Build query with cursor
+    const query = {};
+    if (cursor) {
+      // Decode cursor assuming it's the last seen _id
+      query._id = { $lt: cursor };
     }
 
-    res.json({ success: true, doctors });
+    const doctors = await doctorModel
+      .find(query)
+      .select(["-password", "-email"])
+      .sort({ _id: -1 })
+      .limit(limitNum + 1) // Fetch one extra to determine if there's a next page
+      .lean();
+
+    let nextCursor = null;
+    let hasNextPage = false;
+    
+    // If we fetched more than the limit, we have a next page
+    if (doctors.length > limitNum) {
+      hasNextPage = true;
+      doctors.pop(); // Remove the extra item
+      // The cursor for the next page is the _id of the last item in this page
+      nextCursor = doctors[doctors.length - 1]._id;
+    }
+
+    res.json({ 
+      success: true, 
+      data: doctors, 
+      doctors,
+      pagination: {
+        nextCursor,
+        hasNextPage,
+        limit: limitNum
+      }
+    });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// Dummy hash used to prevent timing-based email enumeration attacks.
+const DUMMY_HASH = "$2b$10$dummyhashfortimingatttackpreventionxx";
 
 // API for Doctor Login
 const doctorLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const doctor = await doctorModel.findOne({ email });
-    if (!doctor) {
-      return res.status(400).json({
-        success: false,
-        message: "Doctor not found",
-      });
-    }
 
-    // Compare the provided password with the hashed password
-    const isPasswordValid = await bcrypt.compare(password, doctor.password);
-    if (!isPasswordValid) {
+    const hashToCompare = doctor ? doctor.password : DUMMY_HASH;
+    const isPasswordValid = await bcrypt.compare(password, hashToCompare);
+
+    if (!doctor || !isPasswordValid) {
       return res.status(400).json({
         success: false,
         message: "Invalid credentials",
@@ -66,7 +98,7 @@ const doctorLogin = async (req, res) => {
     const token = jwt.sign(
       { id: doctor._id, role: "doctor" },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: TOKEN_EXPIRY.doctor }
     );
 
     res.json({
@@ -80,7 +112,7 @@ const doctorLogin = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -95,10 +127,11 @@ const doctorAppointments = async (req, res) => {
     const appointments = await appointmentModel.find({ docId });
     res.json({
       success: true,
+      data: appointments,
       appointments,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -112,9 +145,14 @@ const markAppointmentCompleted = async (req, res) => {
     const { docId, appointmentId } = req.body;
     const appointmentData = await appointmentModel.findById(appointmentId);
 
+    if (!appointmentData) {
+      return res.status(404).json({ success: false, message: "Appointment not found" });
+    }
+
     if (appointmentData && appointmentData.docId.toString() === docId) {
       await appointmentModel.findByIdAndUpdate(appointmentId, {
         isComplete: true,
+        status: "completed",
       });
       res.json({
         success: true,
@@ -127,7 +165,7 @@ const markAppointmentCompleted = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -141,20 +179,34 @@ const markAppointmentCancelled = async (req, res) => {
     const { docId, appointmentId } = req.body;
     const appointmentData = await appointmentModel.findById(appointmentId);
 
+    if (!appointmentData) {
+      return res.status(404).json({ success: false, message: "Appointment not found" });
+    }
+
     if (appointmentData && appointmentData.docId.toString() === docId) {
       if (appointmentData.isCancelled) {
-        return res.json({ success: false, message: "Appointment is already cancelled" });
+        return res.status(409).json({ success: false, message: "Appointment is already cancelled" });
       }
 
       await appointmentModel.findByIdAndUpdate(appointmentId, {
         isCancelled: true,
+        status: "cancelled",
       });
 
-      // Free the slot organically
-      const { slotDate, slotTime } = appointmentData;
-      await doctorModel.findByIdAndUpdate(docId, {
-        $pull: { [`slots_booked.${slotDate}`]: slotTime },
-      });
+      try {
+        // Free the slot organically
+        const { slotDate, slotTime } = appointmentData;
+        await doctorModel.findByIdAndUpdate(docId, {
+          $pull: { [`slots_booked.${slotDate}`]: slotTime },
+        });
+      } catch (pullError) {
+        // Rollback cancellation
+        await appointmentModel.findByIdAndUpdate(appointmentId, {
+          isCancelled: false,
+          status: appointmentData.status || "pending",
+        });
+        throw pullError;
+      }
 
       res.json({
         success: true,
@@ -167,7 +219,7 @@ const markAppointmentCancelled = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -236,10 +288,11 @@ const doctorDashboardData = async (req, res) => {
 
     res.json({
       success: true,
+      data: dashboardData,
       dashboardData,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -250,19 +303,20 @@ const doctorDashboardData = async (req, res) => {
 //API for Doctor Profile
 const doctorProfile = async (req, res) => {
   try {
-    const { docId } = req.body;
+    const docId = req.docId;
     let profileData = await doctorModel.findById(docId).select("-password");
 
-    if (profileData) {
-      await pruneDoctorSlots(profileData);
+    if (!profileData) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
     }
 
     res.json({
       success: true,
+      data: profileData,
       profileData,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -273,7 +327,8 @@ const doctorProfile = async (req, res) => {
 //API to Update Doctor Profile
 const updateDoctorProfile = async (req, res) => {
   try {
-    const { docId, fee, address, availability, about } = req.body;
+    const docId = req.docId;
+    const { fee, address, availability, about } = req.body;
 
     const parsedAddress =
       typeof address === "string" ? JSON.parse(address) : address;
@@ -281,32 +336,26 @@ const updateDoctorProfile = async (req, res) => {
     let imageUrl = null;
 
     if (req.file) {
-      const imageUpload = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { resource_type: "image", folder: "doctors" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(req.file.buffer);
-      });
+      const imageUpload = await uploadImageBuffer(req.file.buffer, "doctors");
       imageUrl = imageUpload.secure_url;
     }
 
-    await doctorModel.findByIdAndUpdate(docId, {
+    const updatedDoctor = await doctorModel.findByIdAndUpdate(docId, {
       fee,
-      address,
+      address: parsedAddress,
       availability,
       about,
       ...(imageUrl && { image: imageUrl }),
     });
+    if (!updatedDoctor) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+    }
     res.json({
       success: true,
       message: "Profile updated successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -367,14 +416,36 @@ const searchDoctors = async (req, res) => {
 
     res.json({
       success: true,
+      data: matchedDoctors,
       doctors: matchedDoctors,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
     });
+  }
+};
+
+const getDoctorProfilePublic = async (req, res) => {
+  try {
+    const { docId } = req.params;
+    if (!mongoose.isValidObjectId(docId)) {
+      return res.status(400).json({ success: false, message: "Invalid doctor ID format" });
+    }
+    const doctor = await doctorModel.findById(docId).select("-password -email");
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+    }
+    res.json({
+      success: true,
+      data: doctor,
+      profileData: doctor,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -389,4 +460,5 @@ export {
   doctorProfile,
   updateDoctorProfile,
   searchDoctors,
+  getDoctorProfilePublic,
 };

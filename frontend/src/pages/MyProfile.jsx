@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -20,6 +21,7 @@ const MyProfile = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [image, setImage] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Initialize address if it doesn't exist
   useEffect(() => {
@@ -46,7 +48,7 @@ const MyProfile = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/update-profile",
         formData,
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (data.success) {
@@ -78,7 +80,10 @@ const MyProfile = () => {
         <p className="text-gray-600 mt-3">
           Please log in to view your profile.
         </p>
-        <button className="mt-6 px-8 py-3 bg-primary text-white rounded-lg shadow hover:bg-primary/90 transition duration-300">
+        <button
+          onClick={() => navigate("/login")}
+          className="mt-6 px-8 py-3 bg-primary text-white rounded-lg shadow hover:bg-primary/90 transition duration-300"
+        >
           Go to Login
         </button>
       </div>
@@ -329,7 +334,7 @@ const MyProfile = () => {
                 {isEdit ? (
                   <input
                     type="date"
-                    value={userData.dob || ""}
+                    value={userData.dob === "Not Selected" ? "" : userData.dob || ""}
                     onChange={(e) =>
                       setUserData((prev) => ({
                         ...prev,
@@ -350,7 +355,14 @@ const MyProfile = () => {
                 </div>
 
                 <div className="font-medium text-gray-700">Member Since:</div>
-                <div className="text-gray-700">April 2025</div>
+                <div className="text-gray-700">
+                  {userData.createdAt
+                    ? new Date(userData.createdAt).toLocaleDateString("en-US", {
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "April 2025"}
+                </div>
               </div>
             </div>
           </div>
@@ -362,6 +374,7 @@ const MyProfile = () => {
 
 // Helper function to calculate age from DOB
 const calculateAge = (dob) => {
+  if (!dob || dob === "Not Selected") return "N/A";
   const birthDate = new Date(dob);
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
@@ -374,7 +387,7 @@ const calculateAge = (dob) => {
     age--;
   }
 
-  return age + " years";
+  return isNaN(age) ? "N/A" : age + " years";
 };
 
 export default MyProfile;

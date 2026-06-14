@@ -49,6 +49,13 @@ const VerifyKhalti = () => {
     const pidx = params.get("pidx");
     let appointmentId = params.get("appointmentId");
 
+    if (!token) {
+      setStatus("error");
+      toast.warn("Session expired. Please log in to verify payment.");
+      navigate("/login");
+      return;
+    }
+
     // Retrieve stored session data
     const storedSession = sessionStorage.getItem("khalti_payment_session");
     let sessionData = null;
@@ -75,7 +82,7 @@ const VerifyKhalti = () => {
       const response = await axios.post(
         `${backendUrl}/api/user/verify-khalti`,
         { pidx, appointmentId },
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.data.success) {
@@ -83,12 +90,10 @@ const VerifyKhalti = () => {
         setProgress(100);
         setPaymentStatus("completed");
 
-        // Handle amount conversion properly
+        // Handle amount conversion properly (Khalti returns amount in Paisa, so divide by 100 to get NPR)
         const responseData = response.data.data;
         const amountInNPR = responseData.amount
-          ? responseData.amount >= 100
-            ? responseData.amount / 100
-            : responseData.amount
+          ? responseData.amount / 100
           : 0;
 
         setPaymentDetails({
@@ -111,29 +116,20 @@ const VerifyKhalti = () => {
 
   const copyTransactionId = async (transactionId) => {
     try {
-      await navigator.clipboard.writeText(transactionId);
-      setCopied(true);
-      toast.success("Transaction ID copied to clipboard!");
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(transactionId);
+        setCopied(true);
+        toast.success("Transaction ID copied to clipboard!");
+      } else {
+        toast.info("Transaction ID: " + transactionId);
+      }
 
       // Reset copied state after 2 seconds
       setTimeout(() => {
         setCopied(false);
       }, 2000);
     } catch (error) {
-      // Fallback for older browsers
-      const textArea = document.createElement("textarea");
-      textArea.value = transactionId;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-
-      setCopied(true);
-      toast.success("Transaction ID copied to clipboard!");
-
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
+      toast.error("Failed to copy Transaction ID");
     }
   };
 

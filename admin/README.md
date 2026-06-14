@@ -1,12 +1,36 @@
-# React + Vite
+# SwiftCare Admin Portal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The SwiftCare Admin Portal provides a comprehensive dashboard for administrators to manage doctors, appointments, and view advanced analytics. It also includes a specialized Doctor Dashboard for doctors to manage their schedules and view their performance.
 
-Currently, two official plugins are available:
+## 🚀 Recent Updates
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Upgraded to Tailwind CSS v4**: Migrated styling engine to the latest Tailwind CSS v4 using Vite plugins for improved performance and modern CSS features.
+- **Analytics Dashboard**: Added a new advanced analytics dashboard (`Analytics.jsx`) featuring interactive charts (using Recharts) to visualize revenue trends, peak booking analysis, and peak demand visualization heatmaps.
+- **Doctor Rankings & Leaderboard**: Implemented a comprehensive ranking system (`Rankings.jsx`) that evaluates doctors based on appointment volume, revenue generated, and patient ratings.
+- **Authentication Improvements**: Enhanced the login flow and context providers to correctly store and persist doctor session information (`doctorInfo`). 
+- **Logout Functionality**: Fixed critical bugs in `Navbar.jsx` to correctly clear independent sessions for both Admins and Doctors.
+- **UI Enhancements**: Added smooth transitions and polished components for adding doctors and viewing appointments.
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
+- React 19
+- Vite
+- Tailwind CSS v4
+- Axios for API requests
+- Recharts for data visualization
+- React Toastify for notifications
+- Lucide React for modern iconography
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🏃‍♂️ Running Locally
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Set up environment variables (`.env`):
+   ```
+   VITE_BACKEND_URL=http://localhost:8001
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```

@@ -1,39 +1,77 @@
-import doctorModel from "../models/doctorModel.js";
+import cron from "node-cron";
+import mongoose from "mongoose";
 
 /**
- * Automatically prunes slots_booked properties older than today
- * Mutates the passed docData directly and asynchronously saves it if changes occurred.
- * This effectively implements Option B safely preventing MongoDB payloads from bloating forever.
- * 
- * @param {Object} docData 
+ * Removes stale slots_booked date keys with a database-side update pipeline.
+ * The job never hydrates doctor documents, which keeps memory usage bounded.
  */
-export const pruneDoctorSlots = async (docData) => {
-  if (!docData || !docData.slots_booked) return docData;
-
+export const pruneExpiredDoctorSlots = async () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const doctorsCollection = mongoose.connection.collection("doctors");
 
-  let modified = false;
-  // Shallow copy object mapping preventing memory lock errors natively
-  const newSlotsBooked = { ...docData.slots_booked };
+  await doctorsCollection.updateMany(
+    {},
+    [
+      {
+        $set: {
+          slots_booked: {
+            $arrayToObject: {
+              $filter: {
+                input: { $objectToArray: { $ifNull: ["$slots_booked", {}] } },
+                as: "slot",
+                cond: {
+                  $or: [
+                    {
+                      $not: {
+                        $regexMatch: {
+                          input: "$$slot.k",
+                          regex: /^\d{1,2}_\d{1,2}_\d{4}$/,
+                        },
+                      },
+                    },
+                    {
+                      $let: {
+                        vars: {
+                          parts: {
+                            $map: {
+                              input: { $split: ["$$slot.k", "_"] },
+                              as: "part",
+                              in: { $toInt: "$$part" },
+                            },
+                          },
+                        },
+                        in: {
+                          $gte: [
+                            {
+                              $dateFromParts: {
+                                year: { $arrayElemAt: ["$$parts", 2] },
+                                month: { $arrayElemAt: ["$$parts", 1] },
+                                day: { $arrayElemAt: ["$$parts", 0] },
+                              },
+                            },
+                            today,
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+  );
+};
 
-  for (const dateKey of Object.keys(newSlotsBooked)) {
-    const parts = dateKey.split("_");
-    if (parts.length === 3) {
-      const [day, month, year] = parts.map(Number);
-      const slotDateObj = new Date(year, month - 1, day);
-      
-      if (slotDateObj < today) {
-        delete newSlotsBooked[dateKey];
-        modified = true;
-      }
+export const startDoctorSlotPruningJob = () => {
+  cron.schedule("0 0 * * *", async () => {
+    try {
+      await pruneExpiredDoctorSlots();
+    } catch (error) {
+      console.error("Doctor slot pruning job failed:", error);
     }
-  }
-
-  if (modified) {
-    await doctorModel.findByIdAndUpdate(docData._id, { slots_booked: newSlotsBooked });
-    docData.slots_booked = newSlotsBooked;
-  }
-
-  return docData;
+  });
 };

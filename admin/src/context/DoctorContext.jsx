@@ -134,7 +134,6 @@ const DoctorContextProvider = (props) => {
 
   const updateDoctorProfile = async (profileData) => {
     try {
-      console.log(profileData)
       const { data } = await axios.post(
         `${backendUrl}/api/doctor/update-profile`,
         profileData,

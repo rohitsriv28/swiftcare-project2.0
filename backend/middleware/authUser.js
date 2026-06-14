@@ -1,17 +1,20 @@
 import jwt from "jsonwebtoken";
+import { getBearerToken } from "./getBearerToken.js";
 
 // user authentication middleware
 const authUser = async (req, res, next) => {
   try {
-    const authHeader = req.headers["authorization"];
-    const token = (authHeader && authHeader.split(" ")[1]) || req.headers["token"];
-    
+    const token = getBearerToken(req);
+
     if (!token) {
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized access!" });
     }
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decodedToken;
+    req.userId = decodedToken.id;
+    if (!req.body) req.body = {};
     req.body.userId = decodedToken.id;
     next();
   } catch (error) {
@@ -27,8 +30,8 @@ const authUser = async (req, res, next) => {
         message: "Invalid token. Please login again.",
       });
     }
-    console.log("Error:", error);
-    res.status(500).json({
+    console.error("User auth error:", error);
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
     });

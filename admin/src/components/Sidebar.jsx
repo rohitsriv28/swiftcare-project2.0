@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { AdminContext } from "../context/AdminContext";
 import { NavLink } from "react-router-dom";
 import { DoctorContext } from "../context/DoctorContext";
-import { Home, Calendar, UserPlus, Users, User } from "lucide-react";
+import { Home, Calendar, UserPlus, Users, User, Trophy, BarChart } from "lucide-react";
 
 const Sidebar = () => {
   const { aToken } = useContext(AdminContext);
@@ -49,6 +49,16 @@ const Sidebar = () => {
             to="/all-doctors"
             icon={<Users size={20} />}
             label="All Doctors"
+          />
+          <NavItem
+            to="/rankings"
+            icon={<Trophy size={20} />}
+            label="Rankings"
+          />
+          <NavItem
+            to="/analytics"
+            icon={<BarChart size={20} />}
+            label="Analytics"
           />
         </div>
       )}

@@ -25,22 +25,35 @@ const Appointment = () => {
   const [slotIndex, setSlotIndex] = useState(0);
   const [slotTime, setSlotTime] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentSlotPage, setCurrentSlotPage] = useState(0);
   const [mobileViewIndex, setMobileViewIndex] = useState(0); // For tracking which group of 3 dates is shown on mobile
   const datesPerMobileView = 3;
   const totalMobileViews = Math.ceil(docSlots.length / datesPerMobileView);
   const navigate = useNavigate();
 
   const fetchDocInfo = async () => {
-    if (!doctors.length) return;
     setLoading(true);
-    const doctor = doctors.find((doc) => doc._id === docId);
+    let doctor = doctors.length ? doctors.find((doc) => doc._id === docId) : null;
+    
     if (doctor) {
       setDocInfo(doctor);
+      setLoading(false);
     } else {
-      console.warn("No matching doctor found for ID:", docId);
-      toast.error("Doctor not found");
+      try {
+        const { data } = await axios.get(`${backendUrl}/api/doctor/profile/${docId}`);
+        if (data.success) {
+          setDocInfo(data.data);
+        } else {
+          console.warn("No matching doctor found for ID:", docId);
+          toast.error(data.message || "Doctor not found");
+        }
+      } catch (error) {
+        console.error("Failed to fetch doctor info fallback:", error);
+        toast.error("Doctor not found");
+      } finally {
+        setLoading(false);
+      }
     }
-    setLoading(false);
   };
 
   const getAvailableSlots = async () => {
@@ -71,7 +84,7 @@ const Appointment = () => {
       let timeSlots = [];
 
       while (currentDate < endTime) {
-        let formattedTime = currentDate.toLocaleTimeString([], {
+        let formattedTime = currentDate.toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
         });
@@ -124,7 +137,7 @@ const Appointment = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/book-appointment",
         { docId, slotDate, slotTime },
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (data.success) {
@@ -140,9 +153,7 @@ const Appointment = () => {
   };
 
   useEffect(() => {
-    if (doctors.length) {
-      fetchDocInfo();
-    }
+    fetchDocInfo();
   }, [doctors, docId]);
 
   useEffect(() => {
@@ -202,8 +213,6 @@ const Appointment = () => {
   useEffect(() => {
     setCurrentSlotPage(0);
   }, [slotIndex]);
-
-  const [currentSlotPage, setCurrentSlotPage] = useState(0);
 
   // Show login message if not logged in
   if (!token) {

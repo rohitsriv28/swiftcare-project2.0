@@ -5,6 +5,7 @@ import doctorModel from "../models/doctorModel.js";
 import jwt from "jsonwebtoken";
 import appointmentModel from "../models/appointmentModel.js";
 import userModel from "../models/userModel.js";
+import { calculatePerformanceScore, calculateCancellationRisk } from "../utils/scoringService.js";
 
 //API for adding doctor
 const addDoctor = async (req, res) => {
@@ -266,11 +267,19 @@ const appointmentCancellationByAdmin = async (req, res) => {
       isCancelled: true,
     });
 
-    // Remove slots efficiently and atomically using pull
-    const { docId, slotDate, slotTime } = appointmentData;
-    await doctorModel.findByIdAndUpdate(docId, {
-      $pull: { [`slots_booked.${slotDate}`]: slotTime },
-    });
+    try {
+      // Remove slots efficiently and atomically using pull
+      const { docId, slotDate, slotTime } = appointmentData;
+      await doctorModel.findByIdAndUpdate(docId, {
+        $pull: { [`slots_booked.${slotDate}`]: slotTime },
+      });
+    } catch (pullError) {
+      // Rollback cancellation
+      await appointmentModel.findByIdAndUpdate(appointmentId, {
+        isCancelled: false,
+      });
+      throw pullError;
+    }
     res.json({ success: true, message: "Appointment cancelled successfully" });
   } catch (error) {
     console.log(error);
@@ -408,6 +417,61 @@ function getLast30DaysAppointments(appointments) {
   return result;
 }
 
+// API to get doctor performance score
+const getDoctorPerformance = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const performance = await calculatePerformanceScore(doctorId);
+    res.json({ success: true, performance });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message || "Internal server error" });
+  }
+};
+
+// API to get all doctors performance scores (for Leaderboard/Rankings)
+const getAllDoctorPerformance = async (req, res) => {
+  try {
+    const doctors = await doctorModel.find({}).select("_id name image speciality averageRating").lean();
+    const performanceList = [];
+    for (const doc of doctors) {
+      const perf = await calculatePerformanceScore(doc._id);
+      performanceList.push({
+        doctorId: doc._id,
+        doctor: {
+          name: doc.name,
+          image: doc.image,
+          speciality: doc.speciality,
+        },
+        completedAppointments: perf.completedAppointments,
+        revenue: perf.revenue,
+        averageRating: perf.averageRating,
+        scores: perf.scores,
+      });
+    }
+    
+    // Sort performanceList by totalScore descending so the leaderboard is ranked
+    performanceList.sort((a, b) => b.scores.totalScore - a.scores.totalScore);
+    
+    res.json({ success: true, data: performanceList });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message || "Internal server error" });
+  }
+};
+
+// API to calculate cancellation risk of a specific appointment
+const getCancellationRisk = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const risk = await calculateCancellationRisk(appointmentId);
+    res.json({ success: true, risk });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message || "Internal server error" });
+  }
+};
+
 export {
   addDoctor,
   adminLogin,
@@ -415,4 +479,7 @@ export {
   allAppointments,
   appointmentCancellationByAdmin,
   adminDashboarddata,
+  getDoctorPerformance,
+  getAllDoctorPerformance,
+  getCancellationRisk,
 };

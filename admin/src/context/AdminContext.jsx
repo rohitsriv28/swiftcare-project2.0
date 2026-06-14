@@ -10,7 +10,8 @@ const AdminContextProvider = (props) => {
   );
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
-  const [pagination, setPagination] = useState(null);
+  const [appointmentsCursor, setAppointmentsCursor] = useState(null);
+  const [hasMoreAppointments, setHasMoreAppointments] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const backendURL = import.meta.env.VITE_BACKEND_URL;
@@ -21,7 +22,7 @@ const AdminContextProvider = (props) => {
       const { data } = await axios.post(
         backendURL + "/api/admin/all-doctors",
         {},
-        { headers: { aToken } }
+        { headers: { Authorization: `Bearer ${aToken}` } }
       );
       if (data.success) {
         console.log("Retrieved doctors:", data.data.length);
@@ -44,7 +45,7 @@ const AdminContextProvider = (props) => {
       const { data } = await axios.post(
         backendURL + "/api/admin/change-availability",
         { docId },
-        { headers: { aToken } }
+        { headers: { Authorization: `Bearer ${aToken}` } }
       );
       if (data.success) {
         toast.success(data.message);
@@ -59,19 +60,19 @@ const AdminContextProvider = (props) => {
     }
   };
 
-  const getAllAppointments = async (page = 1, limit = 10) => {
+  const getAllAppointments = async (limit = 10) => {
     try {
       setIsLoading(true);
       const { data } = await axios.get(
-        `${backendURL}/api/admin/all-appointments?page=${page}&limit=${limit}`,
-        { headers: { aToken } }
+        `${backendURL}/api/admin/all-appointments?limit=${limit}`,
+        { headers: { Authorization: `Bearer ${aToken}` } }
       );
       if (data.success) {
         setAppointments(data.appointments);
-        setPagination(data.pagination);
-        console.log("Retrieved appointments:", data.appointments.length);
-        console.log("Pagination info:", data.pagination);
-        return data.appointments;
+        if (data.pagination) {
+          setAppointmentsCursor(data.pagination.nextCursor);
+          setHasMoreAppointments(data.pagination.hasNextPage);
+        }
       } else {
         toast.error(data.message);
       }
@@ -83,13 +84,34 @@ const AdminContextProvider = (props) => {
     }
   };
 
+  const loadMoreAppointments = async (limit = 10) => {
+    if (!hasMoreAppointments || !appointmentsCursor) return;
+    try {
+      setIsLoading(true);
+      const { data } = await axios.get(
+        `${backendURL}/api/admin/all-appointments?limit=${limit}&cursor=${appointmentsCursor}`,
+        { headers: { Authorization: `Bearer ${aToken}` } }
+      );
+      if (data.success) {
+        setAppointments(prev => [...prev, ...data.appointments]);
+        if (data.pagination) {
+          setAppointmentsCursor(data.pagination.nextCursor);
+          setHasMoreAppointments(data.pagination.hasNextPage);
+        }
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("aToken");
     setAToken("");
     setDashboardData(null);
     setDoctors([]);
     setAppointments([]);
-    setPagination(null);
   };
 
   const cancelAppointment = async (appointmentId) => {
@@ -98,16 +120,12 @@ const AdminContextProvider = (props) => {
       const { data } = await axios.post(
         backendURL + "/api/admin/cancel-appointment",
         { appointmentId },
-        { headers: { aToken } }
+        { headers: { Authorization: `Bearer ${aToken}` } }
       );
       if (data.success) {
         toast.success(data.message);
-        // If pagination is available, reload the current page
-        if (pagination) {
-          await getAllAppointments(pagination.page, pagination.limit);
-        } else {
-          await getAllAppointments();
-        }
+        // Reload all appointments to reflect changes
+        await getAllAppointments();
       } else {
         toast.error(data.message);
       }
@@ -122,7 +140,7 @@ const AdminContextProvider = (props) => {
     try {
       setIsLoading(true);
       const { data } = await axios.get(backendURL + "/api/admin/dashboard", {
-        headers: { aToken },
+        headers: { Authorization: `Bearer ${aToken}` },
       });
       if (data.success) {
         setDashboardData(data.dashboardData);
@@ -150,12 +168,13 @@ const AdminContextProvider = (props) => {
     appointments,
     setAppointments,
     getAllAppointments,
+    loadMoreAppointments,
+    hasMoreAppointments,
     cancelAppointment,
     dashboardData,
     getDashboardData,
     isLoading,
     setIsLoading,
-    pagination,
   };
   return (
     <AdminContext.Provider value={value}>

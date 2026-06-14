@@ -11,15 +11,18 @@ import {
   Users,
   Search,
   RefreshCw,
+  AlertTriangle,
 } from "lucide-react";
+import axios from "axios";
 
 const AllAppointments = () => {
   const {
     aToken,
     appointments,
     getAllAppointments,
+    loadMoreAppointments,
+    hasMoreAppointments,
     cancelAppointment,
-    pagination,
   } = useContext(AdminContext);
   const { currencySymbol, calculateAge, slotDate } = useContext(AppContext);
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,26 +31,12 @@ const AllAppointments = () => {
 
   useEffect(() => {
     if (aToken) {
-      loadAppointments(currentPage, pageSize);
+      getAllAppointments();
     }
-  }, [aToken, currentPage, pageSize]);
-
-  const loadAppointments = (page, limit) => {
-    getAllAppointments(page, limit);
-  };
-
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-  };
-
-  const handlePageSizeChange = (e) => {
-    const newSize = parseInt(e.target.value);
-    setPageSize(newSize);
-    setCurrentPage(1); // Reset to first page when changing page size
-  };
+  }, [aToken]);
 
   const handleRefresh = () => {
-    loadAppointments(currentPage, pageSize);
+    getAllAppointments();
   };
 
   const filteredAppointments = appointments.filter(
@@ -56,6 +45,26 @@ const AllAppointments = () => {
       item.docData.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.docData.speciality.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Risk badge component that uses data from backend
+  const RiskBadge = ({ riskData, isCancelled }) => {
+
+    if (isCancelled || !riskData) return null;
+
+    let colorClass = "bg-green-100 text-green-700 border-green-200";
+    if (riskData.riskLevel === "High") colorClass = "bg-red-100 text-red-700 border-red-200";
+    else if (riskData.riskLevel === "Medium") colorClass = "bg-orange-100 text-orange-700 border-orange-200";
+
+    return (
+      <div 
+        className={`mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${colorClass}`}
+        title={`Risk Score: ${riskData.riskScore}\nFactors: ${riskData.factors.join(', ')}`}
+      >
+        <AlertTriangle size={10} />
+        {riskData.riskLevel} Risk ({riskData.riskScore}%)
+      </div>
+    );
+  };
 
   // Status badge component
   const StatusBadge = ({ isPaid, isCancelled }) => {
@@ -147,22 +156,9 @@ const AllAppointments = () => {
                   key={index}
                   className="grid grid-cols-1 md:grid-cols-12 gap-2 p-3 hover:bg-gray-50 transition-colors text-sm"
                 >
-                  {/* Mobile Header */}
-                  <div className="md:hidden flex justify-between items-center mb-2">
-                    <span className="font-medium text-gray-800">
-                      Appointment #{(currentPage - 1) * pageSize + index + 1}
-                    </span>
-                    <div className="flex items-center space-x-2">
-                      <StatusBadge
-                        isPaid={item.payment}
-                        isCancelled={item.isCancelled}
-                      />
-                    </div>
-                  </div>
-
                   {/* Appointment Number */}
                   <div className="hidden md:flex items-center col-span-1 text-gray-700">
-                    {(currentPage - 1) * pageSize + index + 1}
+                    {index + 1}
                   </div>
 
                   {/* Patient Info */}
@@ -207,6 +203,11 @@ const AllAppointments = () => {
                       <p className="text-xs text-gray-500 truncate">
                         {item.slotTime}
                       </p>
+                    </div>
+                    
+                    {/* Add Risk Badge Here */}
+                    <div className="mt-1">
+                      <RiskBadge riskData={item.cancellationRisk} isCancelled={item.isCancelled} />
                     </div>
                   </div>
 
@@ -268,105 +269,15 @@ const AllAppointments = () => {
             )}
           </div>
 
-          {/* Pagination Controls */}
-          {pagination && (
-            <div className="flex flex-col sm:flex-row justify-between items-center px-4 py-3 bg-gray-50 border-t gap-3 text-sm">
-              <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-                <span className="text-gray-700 whitespace-nowrap">
-                  Showing{" "}
-                  <span className="font-medium">
-                    {filteredAppointments.length > 0
-                      ? (pagination.page - 1) * pagination.limit + 1
-                      : 0}
-                  </span>{" "}
-                  to{" "}
-                  <span className="font-medium">
-                    {Math.min(
-                      pagination.page * pagination.limit,
-                      pagination.total
-                    )}
-                  </span>{" "}
-                  of <span className="font-medium">{pagination.total}</span>{" "}
-                  results
-                </span>
-                <div className="ml-0 sm:ml-2 w-full sm:w-auto">
-                  <select
-                    className="border-gray-300 rounded-md w-full sm:w-auto text-sm"
-                    value={pageSize}
-                    onChange={handlePageSizeChange}
-                  >
-                    <option value="5">5 per page</option>
-                    <option value="10">10 per page</option>
-                    <option value="25">25 per page</option>
-                    <option value="50">50 per page</option>
-                  </select>
-                </div>
-              </div>
-              <div className="flex items-center space-x-1">
-                <button
-                  onClick={() => handlePageChange(pagination.page - 1)}
-                  disabled={!pagination.hasPrevPage}
-                  className={`p-1 rounded-md ${
-                    pagination.hasPrevPage
-                      ? "text-gray-700 hover:bg-gray-200"
-                      : "text-gray-400 cursor-not-allowed"
-                  }`}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <div className="flex">
-                  {[...Array(pagination.totalPages)].map((_, index) => {
-                    // Show limited page numbers with ellipsis for better UX
-                    const pageNum = index + 1;
-                    const isCurrentPage = pageNum === pagination.page;
-                    const isWithinRange =
-                      pageNum === 1 ||
-                      pageNum === pagination.totalPages ||
-                      Math.abs(pageNum - pagination.page) <= 1;
-
-                    if (isWithinRange) {
-                      return (
-                        <button
-                          key={index}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`px-2 py-1 mx-0.5 text-xs rounded-md ${
-                            isCurrentPage
-                              ? "bg-primary text-white"
-                              : "text-gray-700 hover:bg-gray-200"
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    } else if (
-                      (pageNum === 2 && pagination.page > 3) ||
-                      (pageNum === pagination.totalPages - 1 &&
-                        pagination.page < pagination.totalPages - 2)
-                    ) {
-                      return (
-                        <span
-                          key={index}
-                          className="px-2 py-1 mx-0.5 text-xs text-gray-500"
-                        >
-                          ...
-                        </span>
-                      );
-                    }
-                    return null;
-                  })}
-                </div>
-                <button
-                  onClick={() => handlePageChange(pagination.page + 1)}
-                  disabled={!pagination.hasNextPage}
-                  className={`p-1 rounded-md ${
-                    pagination.hasNextPage
-                      ? "text-gray-700 hover:bg-gray-200"
-                      : "text-gray-400 cursor-not-allowed"
-                  }`}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+          {/* Load More Button */}
+          {hasMoreAppointments && (
+            <div className="flex justify-center mt-6 mb-8">
+              <button
+                onClick={() => loadMoreAppointments()}
+                className="bg-white text-gray-700 font-medium px-6 py-2 rounded-full border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
+              >
+                Load More Appointments
+              </button>
             </div>
           )}
         </div>

@@ -39,6 +39,7 @@ const Login = () => {
         });
         if (data.success) {
           localStorage.setItem("dToken", data.token);
+          localStorage.setItem("doctorInfo", JSON.stringify(data.doctor));
           setDToken(data.token);
           toast.success("Login successful!");
         } else {

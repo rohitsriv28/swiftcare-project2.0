@@ -4,21 +4,25 @@ import razorpay from "razorpay";
 import appointmentModel from "../models/appointmentModel.js";
 import transactionModel from "../models/transactionModel.js";
 
+const KHALTI_BASE_URL = process.env.KHALTI_ENV === "production"
+  ? "https://khalti.com/api/v2"
+  : "https://dev.khalti.com/api/v2";
+
 // API for Khalti payment
 const initiateKhaltiPayment = async (req, res) => {
-  const { appointmentId, amount, user } = req.body;
-
-  // Validate minimum amount (10 NPR = 1000 paisa)
-  if (amount < 10) {
-    return res.status(400).json({
-      success: false,
-      message: "Amount must be at least 10 NPR",
-    });
-  }
-
   try {
+    const { appointmentId, amount, user } = req.body;
+
+    // Validate minimum amount (10 NPR = 1000 paisa)
+    if (amount < 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Amount must be at least 10 NPR",
+      });
+    }
+
     const response = await axios.post(
-      "https://dev.khalti.com/api/v2/epayment/initiate/",
+      `${KHALTI_BASE_URL}/epayment/initiate/`,
       {
         return_url: `${process.env.FRONTEND_URL}/verify-khalti?appointmentId=${appointmentId}`,
         website_url: process.env.FRONTEND_URL,
@@ -81,7 +85,7 @@ const verifyKhaltiPayment = async (req, res) => {
   try {
     // First verify with Khalti
     const response = await axios.post(
-      "https://dev.khalti.com/api/v2/epayment/lookup/",
+      `${KHALTI_BASE_URL}/epayment/lookup/`,
       { pidx },
       {
         headers: {
@@ -125,11 +129,7 @@ const verifyKhaltiPayment = async (req, res) => {
     if (purchase_order_id.toString() !== appointmentId.toString()) {
       return res.status(400).json({
         success: false,
-        message: `Appointment ID mismatch. Expected: ${appointmentId}, Received: ${purchase_order_id}`,
-        details: {
-          khaltiPurchaseOrderId: purchase_order_id,
-          ourAppointmentId: appointmentId,
-        },
+        message: "Payment verification failed: appointment mismatch",
       });
     }
 

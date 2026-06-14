@@ -7,6 +7,9 @@ import {
   registerUser,
   updateProfile,
   userLogin,
+  addReview,
+  getDoctorReviews,
+  getRecommendations,
 } from "../controllers/userController.js";
 import authUser from "../middleware/authUser.js";
 import upload from "../middleware/multer.js";
@@ -54,5 +57,12 @@ userRouter.post("/pay-with-khalti", authUser, khaltiValidation, validateRequests
 userRouter.post("/verify-khalti", authUser, verifyKhaltiValidation, validateRequests, verifyKhaltiPayment);
 userRouter.post("/pay-with-razorpay", authUser, razorpayValidation, validateRequests, payWithRazorpay);
 userRouter.post("/verify-razorpay", authUser, verifyRazorpayValidation, validateRequests, verifyRazorpayPayment);
+
+// Review routes
+userRouter.post("/add-review", authUser, addReview);
+userRouter.get("/doctor-reviews/:doctorId", getDoctorReviews);
+
+// Recommendation routes
+userRouter.get("/recommendations", authUser, getRecommendations);
 
 export default userRouter;

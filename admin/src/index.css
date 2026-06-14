@@ -67,6 +67,6 @@ h6 {
   --color-chart-muted: #7dbfca;
 }
 
-::webkit-scrollbar {
+::-webkit-scrollbar {
   display: none;
 }

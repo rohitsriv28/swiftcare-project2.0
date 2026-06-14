@@ -1,7 +1,13 @@
-import jwt from "jsonwebtoken";
-import authUser from "../middleware/authUser.js";
+import { beforeEach, describe, expect, jest, test } from "@jest/globals";
 
-jest.mock("jsonwebtoken");
+jest.unstable_mockModule("jsonwebtoken", () => ({
+  default: {
+    verify: jest.fn(),
+  },
+}));
+
+const jwt = (await import("jsonwebtoken")).default;
+const authUser = (await import("../middleware/authUser.js")).default;
 
 describe("Auth Middleware Tests", () => {
   let mockReq;
@@ -18,7 +24,6 @@ describe("Auth Middleware Tests", () => {
       json: jest.fn(),
     };
     nextFunction = jest.fn();
-    // Clear mocks between tests
     jest.clearAllMocks();
   });
 
@@ -35,8 +40,7 @@ describe("Auth Middleware Tests", () => {
 
   test("Should fail if token is invalid", async () => {
     mockReq.headers.authorization = "Bearer invalidToken123";
-    
-    // Mock jwt.verify to throw JsonWebTokenError
+
     const error = new Error("invalid token");
     error.name = "JsonWebTokenError";
     jwt.verify.mockImplementation(() => {
@@ -55,13 +59,15 @@ describe("Auth Middleware Tests", () => {
 
   test("Should proceed if token is valid via Bearer schema", async () => {
     mockReq.headers.authorization = "Bearer validToken123";
-    
-    // Mock jwt.verify to return a valid payload
     jwt.verify.mockReturnValue({ id: "user123" });
 
     await authUser(mockReq, mockRes, nextFunction);
 
-    expect(jwt.verify).toHaveBeenCalledWith("validToken123", process.env.JWT_SECRET);
+    expect(jwt.verify).toHaveBeenCalledWith(
+      "validToken123",
+      process.env.JWT_SECRET
+    );
+    expect(mockReq.userId).toBe("user123");
     expect(mockReq.body.userId).toBe("user123");
     expect(nextFunction).toHaveBeenCalled();
   });
