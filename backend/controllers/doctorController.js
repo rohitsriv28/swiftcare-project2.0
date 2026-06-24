@@ -359,12 +359,15 @@ const updateDoctorProfile = async (req, res) => {
       availability,
       about,
       ...(imageUrl && { image: imageUrl }),
-    });
+    }, { new: true }).select('-password').lean();
     if (!updatedDoctor) {
       return res
         .status(404)
         .json({ success: false, message: "Doctor not found" });
     }
+
+    // Cascade update to appointments
+    await appointmentModel.updateMany({ docId: docId.toString() }, { $set: { docData: updatedDoctor } });
     res.json({
       success: true,
       message: "Profile updated successfully",

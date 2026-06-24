@@ -156,7 +156,11 @@ const MyAppointments = () => {
         // Optimistically update the UI
         setAppointments((prev) =>
           prev.map((app) =>
-            app._id === appointmentId ? { ...app, hasReviewed: true } : app,
+            app._id === appointmentId ? { 
+              ...app, 
+              hasReviewed: true, 
+              reviewData: { rating: reviewRating, comment: reviewComment } 
+            } : app,
           ),
         );
         setActiveReviewId(null);
@@ -384,7 +388,7 @@ const MyAppointments = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
                       <div>
                         <h4 className="text-lg font-semibold text-gray-800">
-                          Dr. {item.docData.name}
+                          {item.docData.name}
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <Award size={14} className="text-primary" />
@@ -481,7 +485,7 @@ const MyAppointments = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
                       <div>
                         <h4 className="text-lg font-semibold text-gray-800">
-                          Dr. {item.docData.name}
+                          {item.docData.name}
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <Award size={14} className="text-primary" />
@@ -524,7 +528,7 @@ const MyAppointments = () => {
                 </div>
 
                 {/* Review Section */}
-                {!item.hasReviewed && (
+                {!item.hasReviewed ? (
                   <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
                     {activeReviewId !== item._id ? (
                       <button
@@ -542,7 +546,7 @@ const MyAppointments = () => {
                       <div className="w-full bg-gray-50 p-4 rounded-lg border border-gray-200">
                         <h5 className="text-sm font-medium text-gray-800 mb-3 flex items-center gap-2">
                           <Star size={16} className="text-amber-500" />
-                          Rate your experience with Dr. {item.docData.name}
+                          Rate your experience with {item.docData.name}
                         </h5>
 
                         <div className="flex gap-1 mb-4">
@@ -610,6 +614,30 @@ const MyAppointments = () => {
                       </div>
                     )}
                   </div>
+                ) : (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-medium text-gray-800">Your Review</span>
+                        <div className="flex gap-1 ml-auto">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={14}
+                              className={
+                                item.reviewData?.rating >= star
+                                  ? "fill-amber-500 text-amber-500"
+                                  : "text-gray-300"
+                              }
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {item.reviewData?.comment && (
+                        <p className="text-sm text-gray-600 italic">"{item.reviewData.comment}"</p>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             ))}
@@ -651,7 +679,7 @@ const MyAppointments = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700">
-                          Dr. {item.docData.name}
+                          {item.docData.name}
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <Award size={14} className="text-gray-500" />

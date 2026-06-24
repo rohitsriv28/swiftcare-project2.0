@@ -9,8 +9,9 @@ The SwiftCare Patient Portal allows users to discover doctors, book appointments
 - **Khalti Payment Integration**: Added native support for Khalti digital wallet payments alongside existing payment gateways, complete with a dedicated `VerifyKhalti.jsx` page and robust payment modals.
 - **Enhanced UX/UI**:
   - Improved the `MyProfile.jsx` page with better validation handling (specifically for unselected Date of Birth fields).
-  - Enhanced the `MyAppointments.jsx` interface for smoother navigation.
-  - Refined context handling in `AppContext.jsx` to gracefully manage API failures (e.g. 500 errors) and prevent blank screens.
+  - Enhanced the `MyAppointments.jsx` interface to allow patients to leave and view ratings/reviews on completed appointments using optimistic UI updates.
+  - Refined context handling in `AppContext.jsx` to gracefully manage API failures.
+  - Standardized doctor name formatting across the UI, removing hardcoded "Dr." prefixes.
 - **Security Updates**: Ensured secure handling of sensitive data during the appointment booking flow.
 
 ## 🛠️ Tech Stack

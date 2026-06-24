@@ -205,7 +205,7 @@ const DoctorProfile = () => {
                       ? imagePreview
                       : doctorProfile.image || "/default-doctor.png"
                   }
-                  alt={`Dr. ${doctorProfile.name}`}
+                  alt={doctorProfile.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/default-doctor.png";

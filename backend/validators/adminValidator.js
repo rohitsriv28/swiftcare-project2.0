@@ -91,3 +91,17 @@ export const adminAppointmentCancelValidation = [
     .isMongoId()
     .withMessage("Valid appointmentId is required"),
 ];
+
+export const updateDoctorValidation = [
+  body("docId")
+    .trim()
+    .notEmpty()
+    .withMessage("docId is required")
+    .isMongoId()
+    .withMessage("Valid docId is required"),
+  body("password")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters long"),
+];

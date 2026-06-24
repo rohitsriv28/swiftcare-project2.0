@@ -14,12 +14,16 @@ import {
   BarChart2,
   RefreshCcw,
   CheckCircle,
+  Banknote,
+  CreditCard,
 } from "lucide-react";
 import {
   LineChart,
   Line,
   BarChart,
   Bar,
+  AreaChart,
+  Area,
   PieChart as RechartsPieChart,
   Cell,
   XAxis,
@@ -134,7 +138,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 mb-8">
         <StatCard
           title="Total Doctors"
           value={dashboardData.stats.totalDoctors}
@@ -144,9 +148,23 @@ const Dashboard = () => {
           icon={<User className="h-6 w-6 text-blue-500" />}
         />
         <StatCard
+          title="Registered Patients"
+          value={dashboardData.stats.totalPatients}
+          subtext="Total user accounts"
+          bgColor="bg-indigo-50"
+          textColor="text-indigo-600"
+          icon={<User className="h-6 w-6 text-indigo-500" />}
+        />
+        <StatCard
           title="Total Appointments"
           value={dashboardData.stats.totalAppointments}
-          subtext={`${dashboardData.stats.pendingAppointments} active`}
+          subtext={
+            <div className="flex flex-col gap-0.5">
+              <span>• {dashboardData.stats.completedAppointments} completed</span>
+              <span>• {dashboardData.stats.cancelledAppointments} cancelled</span>
+              <span>• {dashboardData.stats.pendingAppointments} upcoming</span>
+            </div>
+          }
           bgColor="bg-green-50"
           textColor="text-green-600"
           icon={<Calendar className="h-6 w-6 text-green-500" />}
@@ -154,7 +172,7 @@ const Dashboard = () => {
         <StatCard
           title="Today's Appointments"
           value={dashboardData.stats.todayAppointments}
-          subtext={`${dashboardData.stats.paidAppointments} paid`}
+          subtext={`${dashboardData.stats.paidAppointments} paid total`}
           bgColor="bg-purple-50"
           textColor="text-purple-600"
           icon={<Clock className="h-6 w-6 text-purple-500" />}
@@ -162,10 +180,26 @@ const Dashboard = () => {
         <StatCard
           title="Total Revenue"
           value={`${currencySymbol}${dashboardData.stats.totalRevenue.toLocaleString()}`}
-          subtext="From paid appointments only"
+          subtext="From all completed & paid"
           bgColor="bg-amber-50"
           textColor="text-amber-600"
           icon={<BadgeIndianRupee className="h-6 w-6 text-amber-500" />}
+        />
+        <StatCard
+          title="Online Revenue"
+          value={`${currencySymbol}${dashboardData.stats.onlineRevenue.toLocaleString()}`}
+          subtext="From online payments"
+          bgColor="bg-emerald-50"
+          textColor="text-emerald-600"
+          icon={<CreditCard className="h-6 w-6 text-emerald-500" />}
+        />
+        <StatCard
+          title="Cash Revenue"
+          value={`${currencySymbol}${dashboardData.stats.cashRevenue.toLocaleString()}`}
+          subtext="From completed cash payments"
+          bgColor="bg-orange-50"
+          textColor="text-orange-600"
+          icon={<Banknote className="h-6 w-6 text-orange-500" />}
         />
       </div>
 
@@ -184,30 +218,33 @@ const Dashboard = () => {
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
+              <AreaChart
                 data={dashboardData.appointmentsByDay}
-                margin={{ top: 5, right: 20, left: 5, bottom: 5 }}
+                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(130,130,120,0.1)" />
                 <XAxis
                   dataKey="displayDate"
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 11, fill: '#88878' }}
                   interval={Math.floor(
                     dashboardData.appointmentsByDay.length / 10,
                   )}
+                  axisLine={false}
+                  tickLine={false}
                 />
-                <YAxis allowDecimals={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip />
                 <Legend />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="allAppointments"
-                  stroke="#8884d8"
-                  activeDot={{ r: 8 }}
-                  name="Appointments"
+                  stroke="#1D9E75"
+                  fill="rgba(29,158,117,0.08)"
+                  name="All Appointments"
                   strokeWidth={2}
+                  activeDot={{ r: 8 }}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -219,7 +256,7 @@ const Dashboard = () => {
               <TrendingUp className="h-5 w-5 text-gray-500 mr-2" />
               <h2 className="text-lg font-medium">Revenue Over Time</h2>
             </div>
-            <div className="text-sm text-gray-500">Paid appointments only</div>
+            <div className="text-sm text-gray-500">Paid and completed cash appointments</div>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -259,7 +296,7 @@ const Dashboard = () => {
               <PieChart className="h-5 w-5 text-gray-500 mr-2" />
               <h2 className="text-lg font-medium">Appointments by Specialty</h2>
             </div>
-            <div className="text-sm text-gray-500">Paid appointments only</div>
+            <div className="text-sm text-gray-500">Paid and completed cash appointments</div>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -475,6 +512,10 @@ const Dashboard = () => {
                           <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
                             Cancelled
                           </span>
+                        ) : appointment.isComplete ? (
+                          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 flex items-center">
+                            <CheckCircle className="h-3 w-3 mr-1" /> Completed
+                          </span>
                         ) : appointment.payment ? (
                           <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 flex items-center">
                             <CheckCircle className="h-3 w-3 mr-1" /> Paid
@@ -501,18 +542,18 @@ const Dashboard = () => {
 const StatCard = ({ title, value, subtext, bgColor, textColor, icon }) => {
   return (
     <div
-      className={`${bgColor} rounded-lg p-5 shadow-sm border border-gray-100`}
+      className={`${bgColor} rounded-lg p-3 lg:p-4 shadow-sm border border-gray-100 flex flex-col justify-between`}
     >
-      <div className="flex justify-between">
+      <div className="flex justify-between items-start">
         <div className="flex flex-col">
-          <p className="text-gray-600 text-sm mb-1">{title}</p>
-          <h3 className={`${textColor} text-2xl font-bold`}>{value}</h3>
-          {subtext && <p className="text-gray-500 text-xs mt-1">{subtext}</p>}
+          <p className="text-gray-600 text-xs lg:text-sm mb-1 leading-tight">{title}</p>
+          <h3 className={`${textColor} text-xl lg:text-2xl font-bold`}>{value}</h3>
         </div>
-        <div className="h-10 w-10 rounded-full flex items-center justify-center bg-white">
+        <div className="h-8 w-8 lg:h-10 lg:w-10 shrink-0 rounded-full flex items-center justify-center bg-white ml-2">
           {icon}
         </div>
       </div>
+      {subtext && <div className="text-gray-500 text-[10px] lg:text-xs mt-2 leading-tight">{subtext}</div>}
     </div>
   );
 };

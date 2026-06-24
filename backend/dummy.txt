@@ -1,0 +1,1 @@
+Not a real image, but good for testing multer

@@ -9,16 +9,25 @@ import {
   Award,
   RefreshCw,
   ArrowUpDown,
+  Edit,
+  Upload,
+  X,
 } from "lucide-react";
 import { AppContext } from "../../context/AppContext";
 
 const DoctorsList = () => {
-  const { doctors, aToken, getAllDoctors, changeAvailability, isLoading } =
+  const { doctors, aToken, getAllDoctors, changeAvailability, updateDoctor, isLoading } =
     useContext(AdminContext);
   const { currencySymbol } = useContext(AppContext);
   const [viewMode, setViewMode] = useState("grid"); // grid or list
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
+
+  // Edit Modal State
+  const [editingDoctor, setEditingDoctor] = useState(null);
+  const [editPassword, setEditPassword] = useState("");
+  const [editImage, setEditImage] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if (aToken) {
@@ -44,6 +53,45 @@ const DoctorsList = () => {
     } else {
       setSortBy(field);
       setSortOrder("asc");
+    }
+  };
+
+  const openEditModal = (doctor) => {
+    setEditingDoctor(doctor);
+    setEditPassword("");
+    setEditImage(null);
+  };
+
+  const closeEditModal = () => {
+    setEditingDoctor(null);
+    setEditPassword("");
+    setEditImage(null);
+  };
+
+  const handleUpdateDoctor = async (e) => {
+    e.preventDefault();
+    if (!editPassword && !editImage) {
+      toast.info("No changes to update");
+      closeEditModal();
+      return;
+    }
+
+    if (editPassword && editPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("docId", editingDoctor._id);
+    if (editPassword) formData.append("password", editPassword);
+    if (editImage) formData.append("image", editImage);
+
+    setIsUpdating(true);
+    const success = await updateDoctor(formData);
+    setIsUpdating(false);
+
+    if (success) {
+      closeEditModal();
     }
   };
 
@@ -188,18 +236,27 @@ const DoctorsList = () => {
                 </div>
               </div>
 
-              <div className="flex items-center pt-3 border-t">
-                <span className="text-sm mr-2">Status</span>
-                <Switch
-                  onChange={() => handleStatusChange(doctor._id)}
-                  checked={doctor.availability}
-                  height={20}
-                  width={40}
-                  onColor="#10b981"
-                  offColor="#ef4444"
-                  checkedIcon={false}
-                  uncheckedIcon={false}
-                />
+              <div className="flex justify-between items-center pt-3 border-t">
+                <div className="flex items-center">
+                  <span className="text-sm mr-2">Status</span>
+                  <Switch
+                    onChange={() => handleStatusChange(doctor._id)}
+                    checked={doctor.availability}
+                    height={20}
+                    width={40}
+                    onColor="#10b981"
+                    offColor="#ef4444"
+                    checkedIcon={false}
+                    uncheckedIcon={false}
+                  />
+                </div>
+                <button
+                  onClick={() => openEditModal(doctor)}
+                  className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                  title="Update Credentials"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
               </div>
             </div>
           ))}
@@ -289,12 +346,147 @@ const DoctorsList = () => {
                         >
                           {doctor.availability ? "Available" : "Unavailable"}
                         </span>
+                        <button
+                          onClick={() => openEditModal(doctor)}
+                          className="ml-auto p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                          title="Update Credentials"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Credentials Modal */}
+      {editingDoctor && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+              onClick={closeEditModal}
+            ></div>
+
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+
+            <div className="relative z-10 inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+              <div className="absolute top-0 right-0 pt-4 pr-4">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="text-gray-400 bg-white rounded-md hover:text-gray-500 focus:outline-none"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="sm:flex sm:items-start">
+                <div className="w-full mt-3 text-center sm:mt-0 sm:text-left">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                    Update Credentials: {editingDoctor.name}
+                  </h3>
+                  <div className="mt-6">
+                    <form onSubmit={handleUpdateDoctor} className="space-y-6">
+                      {/* Password */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          New Password
+                        </label>
+                        <input
+                          type="password"
+                          value={editPassword}
+                          onChange={(e) => setEditPassword(e.target.value)}
+                          placeholder="Leave blank to keep current password"
+                          className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">
+                          Must be at least 8 characters if provided.
+                        </p>
+                      </div>
+
+                      {/* Image Upload */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Profile Picture
+                        </label>
+                        <div className="flex items-center mt-2 space-x-4">
+                          <div className="relative flex items-center justify-center w-16 h-16 overflow-hidden bg-gray-100 rounded-full border border-gray-300">
+                            {editImage ? (
+                              <img
+                                src={URL.createObjectURL(editImage)}
+                                alt="Preview"
+                                className="object-cover w-full h-full"
+                              />
+                            ) : (
+                              <img
+                                src={editingDoctor.image}
+                                alt="Current"
+                                className="object-cover w-full h-full"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = "https://via.placeholder.com/64?text=Dr";
+                                }}
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="edit-img"
+                              className="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm cursor-pointer hover:bg-gray-50"
+                            >
+                              <Upload className="w-4 h-4 mr-2 text-gray-500" />
+                              Change Photo
+                            </label>
+                            <input
+                              type="file"
+                              id="edit-img"
+                              accept="image/*"
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  setEditImage(e.target.files[0]);
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                        <button
+                          type="submit"
+                          disabled={isUpdating || (!editPassword && !editImage)}
+                          className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none sm:ml-3 sm:w-auto sm:text-sm ${
+                            isUpdating || (!editPassword && !editImage)
+                              ? "bg-indigo-400 cursor-not-allowed"
+                              : "bg-indigo-600 hover:bg-indigo-700"
+                          }`}
+                        >
+                          {isUpdating ? "Updating..." : "Update Credentials"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={closeEditModal}
+                          className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

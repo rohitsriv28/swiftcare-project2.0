@@ -162,6 +162,55 @@ const addDoctor = async (req, res) => {
   }
 };
 
+// API to update doctor (password and/or image only)
+const updateDoctor = async (req, res) => {
+  try {
+    const { docId, password } = req.body;
+    const imageFile = req.file;
+
+    const doctor = await doctorModel.findById(docId);
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+    }
+
+    const updateData = {};
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
+    }
+
+    if (imageFile) {
+      // uploading image to cloudinary via stream mapped to buffer natively
+      const uploadedImage = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "image", folder: "doctors" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          },
+        );
+        stream.end(imageFile.buffer);
+      });
+      updateData.image = uploadedImage.secure_url;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ success: false, message: "No updates provided" });
+    }
+
+    const updatedDoctor = await doctorModel.findByIdAndUpdate(docId, updateData, { new: true }).select('-password').lean();
+
+    // Cascade update to appointments
+    await appointmentModel.updateMany({ docId: docId.toString() }, { $set: { docData: updatedDoctor } });
+
+    res.json({ success: true, message: "Doctor updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 //API for admin login
 // Dummy hash used to prevent timing-based email enumeration attacks.
 // When email doesn't match, we still run bcrypt.compare() against this dummy
@@ -275,6 +324,13 @@ const appointmentCancellationByAdmin = async (req, res) => {
       });
     }
 
+    if (appointmentData.isComplete) {
+      return res.json({
+        success: false,
+        message: "Cannot cancel an appointment that is already completed",
+      });
+    }
+
     await appointmentModel.findByIdAndUpdate(appointmentId, {
       isCancelled: true,
     });
@@ -307,15 +363,24 @@ const adminDashboarddata = async (req, res) => {
     const activeDoctors = await doctorModel.countDocuments({
       availability: true,
     });
+    // 2. Appointments stats
     const totalAppointments = await appointmentModel.countDocuments();
-    const totalPatients = await userModel.countDocuments();
     const pendingAppointments = await appointmentModel.countDocuments({
+      isComplete: false,
       isCancelled: false,
+    });
+    const completedAppointments = await appointmentModel.countDocuments({
+      isComplete: true,
+      isCancelled: false,
+    });
+    const cancelledAppointments = await appointmentModel.countDocuments({
+      isCancelled: true,
     });
     const paidAppointments = await appointmentModel.countDocuments({
-      isCancelled: false,
       payment: true,
+      isCancelled: false,
     });
+    const totalPatients = await userModel.countDocuments();
 
     // 2. Today's Appointments
     const today = new Date();
@@ -325,12 +390,20 @@ const adminDashboarddata = async (req, res) => {
       isCancelled: false,
     });
 
-    // 3. Total Revenue via Aggregation
-    const revenueAgg = await appointmentModel.aggregate([
+    // 3. Revenue via Aggregation
+    const onlineRevenueAgg = await appointmentModel.aggregate([
       { $match: { isCancelled: false, payment: true } },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
-    const totalRevenue = revenueAgg[0]?.total || 0;
+    const onlineRevenue = onlineRevenueAgg[0]?.total || 0;
+
+    const cashRevenueAgg = await appointmentModel.aggregate([
+      { $match: { isCancelled: false, payment: false, isComplete: true } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const cashRevenue = cashRevenueAgg[0]?.total || 0;
+
+    const totalRevenue = onlineRevenue + cashRevenue;
 
     // 4. Latest Appointments
     const latestAppointments = await appointmentModel
@@ -340,7 +413,15 @@ const adminDashboarddata = async (req, res) => {
 
     // 5. Top 5 Doctors via Aggregation
     const topDoctorsAgg = await appointmentModel.aggregate([
-      { $match: { isCancelled: false, payment: true } },
+      { 
+        $match: { 
+          isCancelled: false, 
+          $or: [
+            { payment: true },
+            { payment: false, isComplete: true }
+          ]
+        } 
+      },
       {
         $group: {
           _id: "$docId",
@@ -372,7 +453,15 @@ const adminDashboarddata = async (req, res) => {
 
     // 6. Appointments by Specialty
     const specialtyAgg = await appointmentModel.aggregate([
-      { $match: { isCancelled: false, payment: true } },
+      { 
+        $match: { 
+          isCancelled: false, 
+          $or: [
+            { payment: true },
+            { payment: false, isComplete: true }
+          ]
+        } 
+      },
       {
         $group: {
           _id: "$docData.speciality",
@@ -399,10 +488,14 @@ const adminDashboarddata = async (req, res) => {
         activeDoctors,
         totalAppointments,
         pendingAppointments,
+        completedAppointments,
+        cancelledAppointments,
         paidAppointments,
         totalPatients,
         todayAppointments,
         totalRevenue,
+        onlineRevenue,
+        cashRevenue,
       },
       latestAppointments,
       topDoctors,
@@ -437,7 +530,7 @@ function getLast30DaysAppointments(appointments) {
     );
 
     const paidDayAppointments = appointments.filter(
-      (app) => app.slotDate === dateString && !app.isCancelled && app.payment,
+      (app) => app.slotDate === dateString && !app.isCancelled && (app.payment || app.isComplete),
     );
 
     result.push({
@@ -527,6 +620,7 @@ const getCancellationRisk = async (req, res) => {
 
 export {
   addDoctor,
+  updateDoctor,
   adminLogin,
   allDoctors,
   allAppointments,

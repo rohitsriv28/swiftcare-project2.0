@@ -12,6 +12,7 @@ import {
   Search,
   RefreshCw,
   AlertTriangle,
+  CheckCircle,
 } from "lucide-react";
 import axios from "axios";
 
@@ -68,12 +69,19 @@ const AllAppointments = () => {
   };
 
   // Status badge component
-  const StatusBadge = ({ isPaid, isCancelled }) => {
+  const StatusBadge = ({ isComplete, isPaid, isCancelled }) => {
     if (isCancelled) {
       return (
         <span className="text-red-600 text-xs font-medium px-2 py-1 bg-red-50 rounded-full flex items-center gap-1">
           <XCircle className="w-3 h-3" />
           <span>Cancelled</span>
+        </span>
+      );
+    } else if (isComplete) {
+      return (
+        <span className="text-green-600 text-xs font-medium px-2 py-1 bg-green-50 rounded-full flex items-center gap-1">
+          <CheckCircle className="w-3 h-3" />
+          <span>Completed</span>
         </span>
       );
     } else if (isPaid) {
@@ -252,12 +260,13 @@ const AllAppointments = () => {
                     <div className="flex space-x-1 items-center">
                       <div className="hidden md:block">
                         <StatusBadge
+                          isComplete={item.isComplete}
                           isPaid={item.payment}
                           isCancelled={item.isCancelled}
                         />
                       </div>
 
-                      {!item.isCancelled && (
+                      {!item.isCancelled && !item.isComplete && (
                         <button
                           onClick={() => cancelAppointment(item._id)}
                           className="text-red-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 transition-colors"

@@ -19,7 +19,7 @@ const mockAppointments = [
     isCancelled: false,
     isComplete: false,
     docData: {
-      name: "John Smith",
+      name: "Dr. John Smith",
       speciality: "Dermatologist",
       image: "john.jpg",
     },
@@ -35,7 +35,7 @@ const mockAppointments = [
     isComplete: true,
     hasReviewed: false,
     docData: {
-      name: "Sarah Jenkins",
+      name: "Dr. Sarah Jenkins",
       speciality: "Cardiologist",
       image: "sarah.jpg",
     },

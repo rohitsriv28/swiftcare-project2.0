@@ -1,6 +1,7 @@
 import express from "express";
 import {
   addDoctor,
+  updateDoctor,
   adminDashboarddata,
   adminLogin,
   allAppointments,
@@ -26,6 +27,7 @@ import { validateRequests } from "../validators/validateRequests.js";
 import {
   adminLoginValidation,
   addDoctorValidation,
+  updateDoctorValidation,
   changeAvailabilityValidation,
   adminAppointmentCancelValidation,
 } from "../validators/adminValidator.js";
@@ -46,6 +48,14 @@ adminRouter.post(
   addDoctorValidation,
   validateRequests,
   addDoctor,
+);
+adminRouter.post(
+  "/update-doctor",
+  authAdmin,
+  upload.single("image"),
+  updateDoctorValidation,
+  validateRequests,
+  updateDoctor,
 );
 adminRouter.post("/all-doctors", authAdmin, allDoctors);
 adminRouter.post("/search-doctors", authAdmin, searchDoctors);

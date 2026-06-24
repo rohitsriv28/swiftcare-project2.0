@@ -89,7 +89,7 @@ const Rankings = () => {
                 </div>
 
                 <h3 className="text-lg font-bold text-gray-800">
-                  Dr. {doc.doctor.name}
+                  {doc.doctor.name}
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">
                   {doc.doctor.speciality}
@@ -173,7 +173,7 @@ const Rankings = () => {
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       <span className="font-medium text-gray-800">
-                        Dr. {doc.doctor.name}
+                        {doc.doctor.name}
                       </span>
                     </div>
                   </td>

@@ -17,9 +17,11 @@ The SwiftCare Backend Service powers the Patient and Admin portals. It is a robu
   - Implemented direct-to-Cloudinary streaming uploads (`cloudinaryUpload.js`) for faster and more reliable image processing.
 - **Test Coverage**:
   - Added a comprehensive testing suite using Jest and Supertest (`__tests__` directory) covering authentication, booking flows, and payment logic.
-- **Core Logic Fixes**:
+- **Core Logic Fixes & Enhancements**:
   - Resolved request body parameter wiping issues caused by multipart form-data middleware by migrating to token-extracted `req.userId` and `req.docId`.
-  - Updated backend routes to strictly enforce correct HTTP methods (`GET` vs `POST` for profile fetching).
+  - Added strict `.lean()` queries during cascaded profile updates across User, Doctor, and Admin controllers to prevent nested Mongoose metadata pollution.
+  - Updated Admin Dashboard aggregation pipelines (`adminDashboarddata`) to accurately calculate revenue and KPIs by including cash completed appointments alongside online transactions.
+  - Implemented the `updateDoctor` API with strict express-validator rules to allow Admins to securely edit doctor credentials.
 
 ## 🛠️ Tech Stack
 

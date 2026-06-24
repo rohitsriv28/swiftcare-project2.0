@@ -60,6 +60,30 @@ const AdminContextProvider = (props) => {
     }
   };
 
+  const updateDoctor = async (formData) => {
+    try {
+      setIsLoading(true);
+      const { data } = await axios.post(
+        backendURL + "/api/admin/update-doctor",
+        formData,
+        { headers: { Authorization: `Bearer ${aToken}` } },
+      );
+      if (data.success) {
+        toast.success(data.message);
+        await getAllDoctors();
+        return true;
+      } else {
+        toast.error(data.message);
+        return false;
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getAllAppointments = async (limit = 10) => {
     try {
       setIsLoading(true);
@@ -165,6 +189,7 @@ const AdminContextProvider = (props) => {
     doctors,
     getAllDoctors,
     changeAvailability,
+    updateDoctor,
     appointments,
     setAppointments,
     getAllAppointments,

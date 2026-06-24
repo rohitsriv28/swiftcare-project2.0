@@ -135,7 +135,8 @@ const DoctorDashboard = () => {
             <span>Refresh</span>
           </button>
           <div className="text-lg font-medium text-gray-700">
-            Welcome, Dr. {doctorName}
+            Welcome, {doctorName}
+            <span className="inline-block ml-2 wave-animation">👋</span>
           </div>
         </div>
       </div>

@@ -151,12 +151,15 @@ const updateProfile = async (req, res) => {
     }
 
     // Final user data update
-    const updatedUser = await userModel.findByIdAndUpdate(userId, updatedData);
+    const updatedUser = await userModel.findByIdAndUpdate(userId, updatedData, { new: true }).select("-password").lean();
     if (!updatedUser) {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
+
+    // Cascade user update to all their appointments
+    await appointmentModel.updateMany({ userId: userId.toString() }, { $set: { userData: updatedUser } });
 
     res.status(200).json({
       success: true,
@@ -288,15 +291,24 @@ const listAppointments = async (req, res) => {
     // Fetch all reviews by this user to determine which appointments are reviewed
     const userReviews = await reviewModel
       .find({ userId })
-      .select("appointmentId");
-    const reviewedAppointmentIds = new Set(
-      userReviews.map((r) => r.appointmentId.toString()),
-    );
+      .select("appointmentId rating comment");
+      
+    const reviewMap = new Map();
+    userReviews.forEach((r) => {
+      reviewMap.set(r.appointmentId.toString(), {
+        rating: r.rating,
+        comment: r.comment
+      });
+    });
 
-    const appointmentsWithReviewStatus = appointments.map((app) => ({
-      ...app,
-      hasReviewed: reviewedAppointmentIds.has(app._id.toString()),
-    }));
+    const appointmentsWithReviewStatus = appointments.map((app) => {
+      const review = reviewMap.get(app._id.toString());
+      return {
+        ...app,
+        hasReviewed: !!review,
+        reviewData: review || null,
+      };
+    });
 
     res.json({
       success: true,
@@ -493,6 +505,14 @@ const getDoctorReviews = async (req, res) => {
 // API for Doctor Recommendation System
 const getRecommendations = async (req, res) => {
   try {
+    const userId = req.userId;
+
+    // Check if the user has booked at least 2 appointments
+    const appointmentCount = await appointmentModel.countDocuments({ userId });
+    if (appointmentCount < 2) {
+      return res.json({ success: true, data: [] });
+    }
+
     const { speciality } = req.query;
 
     // Base query: find available doctors, optionally filtered by speciality

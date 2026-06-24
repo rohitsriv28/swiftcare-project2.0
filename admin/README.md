@@ -7,9 +7,11 @@ The SwiftCare Admin Portal provides a comprehensive dashboard for administrators
 - **Upgraded to Tailwind CSS v4**: Migrated styling engine to the latest Tailwind CSS v4 using Vite plugins for improved performance and modern CSS features.
 - **Analytics Dashboard**: Added a new advanced analytics dashboard (`Analytics.jsx`) featuring interactive charts (using Recharts) to visualize revenue trends, peak booking analysis, and peak demand visualization heatmaps.
 - **Doctor Rankings & Leaderboard**: Implemented a comprehensive ranking system (`Rankings.jsx`) that evaluates doctors based on appointment volume, revenue generated, and patient ratings.
+- **Dashboard Redesign**: Expanded the Admin Dashboard to include 7 distinct KPI metrics (including segmented Online vs. Cash Revenue and detailed Appointment status breakdowns) in a responsive grid layout. Redesigned the "Appointments Over Time" visualization into a clean Area chart.
+- **Doctor Management Enhancements**: Added functionality for Admins to securely update existing doctor credentials (passwords and profile pictures).
 - **Authentication Improvements**: Enhanced the login flow and context providers to correctly store and persist doctor session information (`doctorInfo`).
 - **Logout Functionality**: Fixed critical bugs in `Navbar.jsx` to correctly clear independent sessions for both Admins and Doctors.
-- **UI Enhancements**: Added smooth transitions and polished components for adding doctors and viewing appointments.
+- **UI Enhancements**: Cleaned up hardcoded text prefixes across rankings and profiles, and added polished components for managing appointments (e.g. hiding cancellation options for completed cash appointments).
 
 ## 🛠️ Tech Stack
 

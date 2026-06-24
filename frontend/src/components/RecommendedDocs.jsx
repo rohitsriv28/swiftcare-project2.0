@@ -5,7 +5,7 @@ import axios from "axios";
 import { Star, Award, Calendar, BadgeCheck, Clock, MapPin } from "lucide-react";
 
 const RecommendedDocs = () => {
-  const { backendUrl, token } = useContext(AppContext);
+  const { backendUrl, token, currencySymbol } = useContext(AppContext);
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -91,7 +91,7 @@ const RecommendedDocs = () => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-800">
-                    Dr. {topMatch.name}
+                    {topMatch.name}
                   </h3>
                   <p className="text-primary font-medium">
                     {topMatch.speciality}
@@ -118,7 +118,7 @@ const RecommendedDocs = () => {
                 </div>
                 <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
                   <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                    ${topMatch.fee}
+                    {currencySymbol}{topMatch.fee}
                   </span>
                 </div>
               </div>
@@ -148,7 +148,7 @@ const RecommendedDocs = () => {
                   />
                   <div>
                     <h3 className="text-lg font-bold text-gray-800 line-clamp-1">
-                      Dr. {doc.name}
+                      {doc.name}
                     </h3>
                     <p className="text-sm text-primary">{doc.speciality}</p>
                   </div>
@@ -162,7 +162,7 @@ const RecommendedDocs = () => {
                     </span>
                   </div>
                   <span className="text-sm font-semibold text-gray-700">
-                    ${doc.fee}
+                    {currencySymbol}{doc.fee}
                   </span>
                 </div>
               </div>

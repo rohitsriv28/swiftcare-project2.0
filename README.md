@@ -12,14 +12,14 @@ The user-facing React application where patients can:
 
 - Browse and filter available doctors by specialty.
 - Receive personalized AI/ML doctor recommendations based on booking history.
-- Book, view, and cancel appointments.
+- Book, view, cancel, and submit reviews/ratings for appointments.
 - Pay for appointments securely via integrations like Khalti.
 
 ### 2. [Admin & Doctor Portal](./admin/README.md)
 
 A secured React dashboard built for administrators and doctors:
 
-- **Admin Features**: Manage doctors, view system-wide appointments, monitor real-time revenue trends, analyze peak demand via heatmaps, and track a dynamic Doctor Leaderboard ranking system.
+- **Admin Features**: Manage doctors (add/edit profiles), view system-wide appointments, monitor real-time revenue trends segmented by cash vs online, analyze peak demand via heatmaps, and track a dynamic Doctor Leaderboard ranking system.
 - **Doctor Features**: Manage availability, update profiles, and view upcoming patient appointments and performance metrics.
 
 ### 3. [Backend Service](./backend/README.md)
